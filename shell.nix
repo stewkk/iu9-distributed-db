@@ -22,6 +22,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pythonWithPytest
     pkgs.nodePackages.pyright
     pkgs.plantuml
+    pkgs.systemd
 
     # keep this line if you use bash
     pkgs.bashInteractive
@@ -29,6 +30,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
 
   nativeBuildInputs = [
     pkgs.clang-tools_18
+    pkgs.pkg-config
   ];
 
   NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
