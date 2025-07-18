@@ -50,6 +50,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
 
     export LD_LIBRARY_PATH=$NIX_LD_LIBRARY_PATH
     export PYTHONPATH="${pythonWithPytest}/lib/python3.13/site-packages:$PYTHONPATH"
+    export PATH="$PWD/build/bin:$PATH"
 
     if [ -f requirements.txt ]; then
       pip install -r requirements.txt
