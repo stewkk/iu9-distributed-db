@@ -1,4 +1,5 @@
 include(FetchGRPC)
+include(FetchBoost)
 
 get_filename_component(my_proto "example.proto" ABSOLUTE)
 get_filename_component(my_proto_path "${my_proto}" PATH)
@@ -28,6 +29,27 @@ target_link_libraries(my_grpc_proto
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF})
 
+add_library(libdb
+  logic/storage/storage.cpp
+)
+add_library(stewkk::libdb ALIAS libdb)
+target_compile_features(libdb PUBLIC cxx_std_20)
+set_target_properties(libdb PROPERTIES
+  CXX_STANDART 20
+  CXX_STANDART_REQUIRED YES
+  CXX_EXTENSIONS YES
+)
+set_target_properties(libdb PROPERTIES OUTPUT_NAME stewkk_db)
+target_include_directories(
+  libdb PUBLIC $<INSTALL_INTERFACE:include>
+                    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+)
+target_compile_options(libdb PRIVATE ${BASE_COMPILE_FLAGS})
+target_link_options(libdb PRIVATE ${BASE_LINK_FLAGS})
+target_link_libraries(libdb
+  Boost::outcome
+)
+
 add_executable(iu9-db main.cpp)
 target_compile_features(iu9-db PRIVATE cxx_std_20)
 set_target_properties(iu9-db PROPERTIES
@@ -37,6 +59,7 @@ set_target_properties(iu9-db PROPERTIES
 )
 target_compile_options(iu9-db PRIVATE ${BASE_COMPILE_FLAGS})
 target_link_libraries(iu9-db
+  stewkk::libdb
   my_grpc_proto
   absl::check
   absl::flags
