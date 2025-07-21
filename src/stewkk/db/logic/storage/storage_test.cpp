@@ -21,6 +21,8 @@ TEST(StorageTest, GetNonExisting) {
   MapStorage storage;
 
   auto got = storage.Get("key");
+
+  ASSERT_THAT(got.has_error(), IsTrue);
 }
 
 TEST(StorageTest, GetAfterRemove) {
@@ -30,6 +32,14 @@ TEST(StorageTest, GetAfterRemove) {
   auto _ = storage.Remove("key");
 
   auto got = storage.Get("key");
+
+  ASSERT_THAT(got.has_error(), IsTrue);
+}
+
+TEST(StorageTest, RemoveNonExisting) {
+  MapStorage storage;
+
+  auto got = storage.Remove("key");
 
   ASSERT_THAT(got.has_error(), IsTrue);
 }
