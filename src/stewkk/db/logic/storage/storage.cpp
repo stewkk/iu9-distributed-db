@@ -1,7 +1,5 @@
 #include <stewkk/db/logic/storage/storage.hpp>
 
-#include <format>
-
 namespace stewkk::db::logic::storage {
 
 using result::Error;
@@ -10,7 +8,7 @@ using result::Ok;
 Result<KwPair> MapStorage::Get(std::string key) {
   auto it = map_.find(key);
   if (it == map_.end()) {
-    return Error(std::runtime_error{std::format("key {} not found in storage", key)});
+    return Error("key {} not found in storage", key);
   }
   return KwPair{.key = key, .value = it->second};
 }
