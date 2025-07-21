@@ -18,4 +18,6 @@ std::exception_ptr Error(std::format_string<Args...> fmt, Args&&... args) {
   return std::make_exception_ptr(std::runtime_error{std::format(fmt, args...)});
 }
 
+std::string What(std::exception_ptr ex_ptr);
+
 }  // namespace stewkk::db::logic::result

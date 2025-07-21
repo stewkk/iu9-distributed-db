@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 
+#include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/logic/storage/storage.hpp>
 
 using ::testing::Eq;
@@ -20,9 +21,9 @@ TEST(StorageTest, Get) {
 TEST(StorageTest, GetNonExisting) {
   MapStorage storage;
 
-  auto got = storage.Get("key");
+  auto got = storage.Get("abc").error();
 
-  ASSERT_THAT(got.has_error(), IsTrue);
+  ASSERT_THAT(result::What(got), Eq("key abc not found in storage"));
 }
 
 TEST(StorageTest, GetAfterRemove) {
@@ -39,9 +40,9 @@ TEST(StorageTest, GetAfterRemove) {
 TEST(StorageTest, RemoveNonExisting) {
   MapStorage storage;
 
-  auto got = storage.Remove("key");
+  auto got = storage.Remove("abc").error();
 
-  ASSERT_THAT(got.has_error(), IsTrue);
+  ASSERT_THAT(result::What(got), Eq("key abc not found in storage"));
 }
 
 }  // namespace stewkk::db::logic::storage
