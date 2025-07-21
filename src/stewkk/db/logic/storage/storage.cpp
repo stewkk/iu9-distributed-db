@@ -28,7 +28,9 @@ Result<> MapStorage::Remove(std::string key) {
   return Ok();
 }
 
-void MapStorage::Insert(KwPair data) { map_.emplace(std::move(data.key), std::move(data.value)); }
+void MapStorage::Insert(KwPair data) {
+  map_.insert_or_assign(std::move(data.key), std::move(data.value));
+}
 
 Result<> MapStorage::Update(KwPair data) { return Ok(); }
 

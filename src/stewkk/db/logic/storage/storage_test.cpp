@@ -45,4 +45,16 @@ TEST(StorageTest, RemoveNonExisting) {
   ASSERT_THAT(result::What(got), Eq("key abc not found in storage"));
 }
 
+TEST(StorageTest, InsertUpdatesExistingKey) {
+  MapStorage storage;
+  KwPair data{.key = "key", .value = "value"};
+  storage.Insert(data);
+  data.value = "other";
+
+  storage.Insert(data);
+  auto got = storage.Get("key");
+
+  ASSERT_THAT(got.value().value, Eq("other"));
+}
+
 }  // namespace stewkk::db::logic::storage
