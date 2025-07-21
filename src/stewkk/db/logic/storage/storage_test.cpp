@@ -21,6 +21,15 @@ TEST(StorageTest, GetNonExisting) {
   MapStorage storage;
 
   auto got = storage.Get("key");
+}
+
+TEST(StorageTest, GetAfterRemove) {
+  MapStorage storage;
+  KwPair data{.key = "key", .value = "value"};
+  storage.Insert(data);
+  auto _ = storage.Remove("key");
+
+  auto got = storage.Get("key");
 
   ASSERT_THAT(got.has_error(), IsTrue);
 }
