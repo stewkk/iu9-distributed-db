@@ -5,6 +5,7 @@
 
 using ::testing::Eq;
 using ::testing::IsTrue;
+using ::testing::StrEq;
 
 namespace stewkk::db::logic::storage {
 
@@ -23,7 +24,7 @@ TEST(StorageTest, GetNonExisting) {
 
   auto got = storage.Get("abc").error();
 
-  ASSERT_THAT(result::What(got), Eq("key abc not found in storage"));
+  ASSERT_THAT(result::What(got), StrEq("key abc not found in storage"));
 }
 
 TEST(StorageTest, GetAfterRemove) {
@@ -42,7 +43,7 @@ TEST(StorageTest, RemoveNonExisting) {
 
   auto got = storage.Remove("abc").error();
 
-  ASSERT_THAT(result::What(got), Eq("key abc not found in storage"));
+  ASSERT_THAT(result::What(got), StrEq("key abc not found in storage"));
 }
 
 TEST(StorageTest, InsertUpdatesExistingKey) {
@@ -55,6 +56,27 @@ TEST(StorageTest, InsertUpdatesExistingKey) {
   auto got = storage.Get("key");
 
   ASSERT_THAT(got.value().value, Eq("other"));
+}
+
+TEST(StorageTest, Update) {
+  MapStorage storage;
+  KwPair data{.key = "key", .value = "value"};
+  storage.Insert(data);
+  data.value = "other";
+
+  auto _ = storage.Update(data);
+  auto got = storage.Get("key");
+
+  ASSERT_THAT(got.value().value, Eq("other"));
+}
+
+TEST(StorageTest, UpdateFailsOnNonExistingKey) {
+  MapStorage storage;
+  KwPair data{.key = "abc", .value = "value"};
+
+  auto got = storage.Update(data).error();
+
+  ASSERT_THAT(result::What(got), StrEq("trying to update non-existing key abc"));
 }
 
 }  // namespace stewkk::db::logic::storage

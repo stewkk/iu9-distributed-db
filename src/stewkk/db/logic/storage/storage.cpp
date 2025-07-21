@@ -32,6 +32,13 @@ void MapStorage::Insert(KwPair data) {
   map_.insert_or_assign(std::move(data.key), std::move(data.value));
 }
 
-Result<> MapStorage::Update(KwPair data) { return Ok(); }
+Result<> MapStorage::Update(KwPair data) {
+  auto it = map_.find(data.key);
+  if (it == map_.end()) {
+    return Error("trying to update non-existing key {}", data.key);
+  }
+  it->second = std::move(data.value);
+  return Ok();
+}
 
 }  // namespace stewkk::db::logic::storage
