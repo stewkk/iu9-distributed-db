@@ -1,4 +1,4 @@
-#include <stewkk/db/logic/storage/storage.hpp>
+#include <stewkk/db/logic/storage/inmemory.hpp>
 
 namespace stewkk::db::logic::storage {
 

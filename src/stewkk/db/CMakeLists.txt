@@ -30,7 +30,7 @@ target_link_libraries(my_grpc_proto
   ${_PROTOBUF_LIBPROTOBUF})
 
 add_library(libdb
-  logic/storage/storage.cpp
+  logic/storage/inmemory.cpp
   logic/result/result.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)

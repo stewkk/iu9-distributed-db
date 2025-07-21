@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 
 #include <stewkk/db/logic/result/result.hpp>
-#include <stewkk/db/logic/storage/storage.hpp>
+#include <stewkk/db/logic/storage/inmemory.hpp>
 
 using ::testing::Eq;
 using ::testing::IsTrue;
