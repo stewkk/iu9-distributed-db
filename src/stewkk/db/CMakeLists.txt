@@ -31,6 +31,7 @@ target_link_libraries(my_grpc_proto
 
 add_library(libdb
   logic/storage/storage.cpp
+  logic/result/result.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
 target_compile_features(libdb PUBLIC cxx_std_20)

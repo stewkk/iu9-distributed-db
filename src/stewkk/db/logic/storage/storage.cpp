@@ -4,7 +4,8 @@
 
 namespace stewkk::db::logic::storage {
 
-std::exception_ptr Error(const std::exception& e) { return std::make_exception_ptr(e); }
+using result::Error;
+using result::Ok;
 
 Result<KwPair> MapStorage::Get(std::string key) {
   auto it = map_.find(key);

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <boost/outcome.hpp>
-#include <boost/outcome/success_failure.hpp>
-
-#include <expected>
 #include <string>
 #include <unordered_map>
 
+#include <stewkk/db/logic/result/result.hpp>
+
 namespace stewkk::db::logic::storage {
+
+using result::Result;
 
 struct KwPair {
   std::string key;
@@ -15,14 +15,6 @@ struct KwPair {
 
   bool operator==(const KwPair& other) const = default;
 };
-
-struct EmptyResult {};
-
-template <typename T = EmptyResult> using Result = boost::outcome_v2::result<T, std::exception_ptr>;
-
-template <typename T = EmptyResult> auto Ok(T&& v) { return boost::outcome_v2::success(v); }
-
-std::exception_ptr Error(const std::exception& e);
 
 class MapStorage {
 public:
