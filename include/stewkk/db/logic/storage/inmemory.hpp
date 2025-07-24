@@ -4,27 +4,28 @@
 #include <unordered_map>
 
 #include <stewkk/db/logic/result/result.hpp>
+#include <stewkk/db/models/storage/kw_pair.hpp>
 
 namespace stewkk::db::logic::storage {
 
+using models::storage::KwPair;
 using result::Result;
 
-struct KwPair {
-  std::string key;
-  std::string value;
+class MemoryStorage {
+  using Map = std::unordered_map<std::string, std::string>;
+  using ConstIterator = Map::const_iterator;
 
-  bool operator==(const KwPair& other) const = default;
-};
-
-class MapStorage {
 public:
   Result<KwPair> Get(std::string key);
   Result<> Remove(std::string key);
   void Insert(KwPair data);
   Result<> Update(KwPair data);
 
+  ConstIterator begin();
+  ConstIterator end();
+
 private:
-  std::unordered_map<std::string, std::string> map_;
+  Map map_;
 };
 
 }  // namespace stewkk::db::logic::storage

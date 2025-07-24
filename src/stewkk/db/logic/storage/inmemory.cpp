@@ -11,7 +11,7 @@ constexpr static std::string_view kNotFound{"key {} not found in storage"};
 
 }  // namespace
 
-Result<KwPair> MapStorage::Get(std::string key) {
+Result<KwPair> MemoryStorage::Get(std::string key) {
   auto it = map_.find(key);
   if (it == map_.end()) {
     return Error(kNotFound, key);
@@ -19,7 +19,7 @@ Result<KwPair> MapStorage::Get(std::string key) {
   return KwPair{.key = key, .value = it->second};
 }
 
-Result<> MapStorage::Remove(std::string key) {
+Result<> MemoryStorage::Remove(std::string key) {
   auto it = map_.find(key);
   if (it == map_.end()) {
     return Error(kNotFound, key);
@@ -28,11 +28,11 @@ Result<> MapStorage::Remove(std::string key) {
   return Ok();
 }
 
-void MapStorage::Insert(KwPair data) {
+void MemoryStorage::Insert(KwPair data) {
   map_.insert_or_assign(std::move(data.key), std::move(data.value));
 }
 
-Result<> MapStorage::Update(KwPair data) {
+Result<> MemoryStorage::Update(KwPair data) {
   auto it = map_.find(data.key);
   if (it == map_.end()) {
     return Error("trying to update non-existing key {}", data.key);
@@ -40,5 +40,8 @@ Result<> MapStorage::Update(KwPair data) {
   it->second = std::move(data.value);
   return Ok();
 }
+
+MemoryStorage::ConstIterator MemoryStorage::begin() { return map_.cbegin(); }
+MemoryStorage::ConstIterator MemoryStorage::end() { return map_.cend(); }
 
 }  // namespace stewkk::db::logic::storage

@@ -31,6 +31,8 @@ target_link_libraries(my_grpc_proto
 
 add_library(libdb
   logic/storage/inmemory.cpp
+  logic/storage/persistent.cpp
+  logic/storage/filesystem.cpp
   logic/result/result.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
@@ -49,6 +51,7 @@ target_compile_options(libdb PRIVATE ${BASE_COMPILE_FLAGS})
 target_link_options(libdb PRIVATE ${BASE_LINK_FLAGS})
 target_link_libraries(libdb
   Boost::outcome
+  Boost::uuid
 )
 
 add_executable(iu9-db main.cpp)

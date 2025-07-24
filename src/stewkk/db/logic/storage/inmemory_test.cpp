@@ -9,8 +9,8 @@ using ::testing::StrEq;
 
 namespace stewkk::db::logic::storage {
 
-TEST(StorageTest, Get) {
-  MapStorage storage;
+TEST(MemoryStorageTest, Get) {
+  MemoryStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
 
@@ -19,16 +19,16 @@ TEST(StorageTest, Get) {
   ASSERT_THAT(got.value(), Eq(data));
 }
 
-TEST(StorageTest, GetNonExisting) {
-  MapStorage storage;
+TEST(MemoryStorageTest, GetNonExisting) {
+  MemoryStorage storage;
 
   auto got = storage.Get("abc").error();
 
   ASSERT_THAT(result::What(got), StrEq("key abc not found in storage"));
 }
 
-TEST(StorageTest, GetAfterRemove) {
-  MapStorage storage;
+TEST(MemoryStorageTest, GetAfterRemove) {
+  MemoryStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
   auto _ = storage.Remove("key");
@@ -38,16 +38,16 @@ TEST(StorageTest, GetAfterRemove) {
   ASSERT_THAT(got.has_error(), IsTrue);
 }
 
-TEST(StorageTest, RemoveNonExisting) {
-  MapStorage storage;
+TEST(MemoryStorageTest, RemoveNonExisting) {
+  MemoryStorage storage;
 
   auto got = storage.Remove("abc").error();
 
   ASSERT_THAT(result::What(got), StrEq("key abc not found in storage"));
 }
 
-TEST(StorageTest, InsertUpdatesExistingKey) {
-  MapStorage storage;
+TEST(MemoryStorageTest, InsertUpdatesExistingKey) {
+  MemoryStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
   data.value = "other";
@@ -58,8 +58,8 @@ TEST(StorageTest, InsertUpdatesExistingKey) {
   ASSERT_THAT(got.value().value, Eq("other"));
 }
 
-TEST(StorageTest, Update) {
-  MapStorage storage;
+TEST(MemoryStorageTest, Update) {
+  MemoryStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
   data.value = "other";
@@ -70,8 +70,8 @@ TEST(StorageTest, Update) {
   ASSERT_THAT(got.value().value, Eq("other"));
 }
 
-TEST(StorageTest, UpdateFailsOnNonExistingKey) {
-  MapStorage storage;
+TEST(MemoryStorageTest, UpdateFailsOnNonExistingKey) {
+  MemoryStorage storage;
   KwPair data{.key = "abc", .value = "value"};
 
   auto got = storage.Update(data).error();

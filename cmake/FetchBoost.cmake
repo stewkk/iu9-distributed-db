@@ -8,6 +8,6 @@ FetchContent_Declare(
   EXCLUDE_FROM_ALL
 )
 
-set(BOOST_INCLUDE_LIBRARIES outcome)
+set(BOOST_INCLUDE_LIBRARIES outcome uuid)
 
 FetchContent_MakeAvailable(Boost)
