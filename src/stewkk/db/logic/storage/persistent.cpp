@@ -9,6 +9,9 @@
 
 namespace stewkk::db::logic::storage {
 
+using result::Error;
+using result::WrapError;
+
 namespace {
 
 static constexpr std::string_view kVersion = "v1";
@@ -27,9 +30,9 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
   auto path = GetPath();
   auto f_opt = CreateBinaryFile(path);
   if (f_opt.has_failure()) {
-    return result::WrapError(std::move(f_opt), "failed to create persistent storage");
+    return WrapError(std::move(f_opt), "failed to create persistent storage");
   }
-  auto& f = f_opt.value();
+  auto& f = f_opt.assume_value();
 
   Metadata meta{.map_size = data.size()};
   f.write(reinterpret_cast<char*>(&meta), sizeof(meta));
@@ -49,7 +52,7 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
 
   auto res_opt = OpenBinaryFile(path);
   if (res_opt.has_failure()) {
-    return result::WrapError(std::move(res_opt), "failed to open persistent storage");
+    return WrapError(std::move(res_opt), "failed to open persistent storage");
   }
 
   return PersistentStorage(std::move(path), std::move(res_opt.value()), std::move(meta),
@@ -65,6 +68,8 @@ PersistentStorage::PersistentStorage(fs::path path, std::ifstream fstream, Metad
       data_offset_(0) {
   data_offset_ = sizeof(Metadata) + index_.size() * sizeof(PersistentKwPair);
 }
+
+fs::path PersistentStorage::Path() const { return path_; }
 
 std::string PersistentStorage::ReadString(PersistentString persistent_str) {
   f_.seekg(persistent_str.index + data_offset_);
@@ -82,7 +87,7 @@ Result<KwPair> PersistentStorage::Get(std::string_view key) {
                              });
 
   if (it == index_.cend() || key != ReadString(it->key)) {
-    return result::Error("key {} not found in persistent storage {}", key, path_.string());
+    return Error("key {} not found in persistent storage {}", key, path_.string());
   }
 
   return KwPair{
@@ -107,5 +112,22 @@ void IndexBuilder::AddRecord(const KwPair& pair) {
 }
 
 std::vector<PersistentKwPair> IndexBuilder::GetIndex() const { return index_; }
+
+Result<PersistentStorage> LoadPersistentStorage(fs::path path) {
+  auto f_opt = OpenBinaryFile(path);
+  if (f_opt.has_failure()) {
+    return WrapError(std::move(f_opt), "failed to load persistent storage");
+  }
+  auto& f = f_opt.assume_value();
+
+  Metadata meta;
+  // TODO: add error checked function ReadFile
+  f.read(reinterpret_cast<char*>(&meta), sizeof(Metadata));
+
+  Index index(meta.map_size);
+  f.read(reinterpret_cast<char*>(index.data()), index.size() * sizeof(decltype(index)::value_type));
+
+  return PersistentStorage(std::move(path), std::move(f), std::move(meta), std::move(index));
+}
 
 }  // namespace stewkk::db::logic::storage

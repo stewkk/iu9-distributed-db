@@ -21,6 +21,7 @@ class PersistentStorage {
 public:
   PersistentStorage(fs::path path, std::ifstream stream, Metadata metadata, Index index);
   Result<KwPair> Get(std::string_view key);
+  fs::path Path() const;
 
 private:
   std::string ReadString(PersistentString persistent_str);
@@ -55,5 +56,7 @@ Result<PersistentStorage> NewPersistentStorage(const std::ranges::input_range au
   std::vector<KwPair> data{provider.begin(), provider.end()};
   return NewPersistentStorage(std::move(data));
 }
+
+Result<PersistentStorage> LoadPersistentStorage(fs::path path);
 
 }  // namespace stewkk::db::logic::storage

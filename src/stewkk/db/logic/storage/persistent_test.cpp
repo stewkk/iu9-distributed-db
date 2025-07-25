@@ -28,4 +28,17 @@ TEST(PersistentStorageTest, Get) {
   ASSERT_THAT(got.value().value, Eq("value4"));
 }
 
+TEST(PersistentStorageTest, SaveAndLoad) {
+  fs::path path;
+  {
+    auto persistent = NewPersistentStorage(InitStorage()).value();
+    path = persistent.Path();
+  }
+  auto persistent = LoadPersistentStorage(path).value();
+
+  auto got = persistent.Get("key4");
+
+  ASSERT_THAT(got.value().value, Eq("value4"));
+}
+
 }  // namespace stewkk::db::logic::storage
