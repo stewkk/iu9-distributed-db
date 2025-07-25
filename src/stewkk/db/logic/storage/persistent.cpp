@@ -80,6 +80,7 @@ fs::path PersistentStorage::Path() const { return path_; }
 std::string PersistentStorage::ReadString(PersistentString persistent_str) {
   f_.seekg(persistent_str.index + data_offset_);
   std::string res(persistent_str.size, '\0');
+  // TODO: turn exception into Result
   f_.read(res.data(), persistent_str.size);
   return res;
 }
