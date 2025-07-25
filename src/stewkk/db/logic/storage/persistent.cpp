@@ -38,7 +38,9 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
   auto f = std::move(f_opt).assume_value();
 
   Metadata meta{.map_size = data.size()};
-  f.write(reinterpret_cast<char*>(&meta), sizeof(meta));
+  if (auto res = WriteToFile(f, meta); res.has_failure()) {
+    return WrapError(std::move(res), kFailedToCreate);
+  }
 
   std::sort(data.begin(), data.end());
   IndexBuilder index_builder;
@@ -46,8 +48,9 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
     index_builder.AddRecord(kw_pair);
   }
   auto index = index_builder.GetIndex();
-  f.write(reinterpret_cast<char*>(index.data()),
-          index.size() * sizeof(decltype(index)::value_type));
+  if (auto res = WriteToFile(f, index); res.has_failure()) {
+    return WrapError(std::move(res), kFailedToCreate);
+  }
 
   for (auto&& el : data) {
     f << std::move(el).key << std::move(el).value;

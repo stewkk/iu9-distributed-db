@@ -9,8 +9,12 @@
 namespace stewkk::db::logic::storage {
 
 using result::Error;
+using result::Ok;
 using result::Result;
 namespace fs = std::filesystem;
+
+static constexpr std::string_view kFailedToRead = "failed to read file: {}";
+static constexpr std::string_view kFailedToWrite = "failed to write file: {}";
 
 Result<std::ofstream> CreateBinaryFile(fs::path path);
 
@@ -23,7 +27,7 @@ template <typename T> Result<T> ReadFromFile(type<T>, std::ifstream& f) {
   try {
     f.read(reinterpret_cast<char*>(&res), sizeof(T));
   } catch (const std::exception& ex) {
-    return Error("failed to read file: {}", ex.what());
+    return Error(kFailedToRead, ex.what());
   }
   return res;
 }
@@ -34,7 +38,7 @@ Result<std::vector<T>> ReadFromFile(type<std::vector<T>>, std::ifstream& f, std:
   try {
     f.read(reinterpret_cast<char*>(res.data()), res.size() * sizeof(T));
   } catch (const std::exception& ex) {
-    return Error("failed to read file: {}", ex.what());
+    return Error(kFailedToRead, ex.what());
   }
   return res;
 }
@@ -45,6 +49,24 @@ template <typename T> Result<T> ReadFromFile(std::ifstream& f) {
 
 template <typename T> Result<T> ReadFromFile(std::ifstream& f, std::size_t size) {
   return ReadFromFile(type<T>{}, f, size);
+}
+
+template <typename T> Result<> WriteToFile(std::ofstream& f, const T& data) {
+  try {
+    f.write(reinterpret_cast<const char*>(&data), sizeof(data));
+    return Ok();
+  } catch (const std::exception& ex) {
+    return Error(kFailedToWrite, ex.what());
+  }
+}
+
+template <typename T> Result<> WriteToFile(std::ofstream& f, const std::vector<T>& vec) {
+  try {
+    f.write(reinterpret_cast<const char*>(vec.data()), vec.size() * sizeof(T));
+    return Ok();
+  } catch (const std::exception& ex) {
+    return Error(kFailedToWrite, ex.what());
+  }
 }
 
 }  // namespace stewkk::db::logic::storage
