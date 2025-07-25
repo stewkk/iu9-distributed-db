@@ -41,7 +41,22 @@ Result<> MemoryStorage::Update(KwPair data) {
   return Ok();
 }
 
-MemoryStorage::ConstIterator MemoryStorage::begin() { return map_.cbegin(); }
-MemoryStorage::ConstIterator MemoryStorage::end() { return map_.cend(); }
+MemoryStorage::Iterator MemoryStorage::begin() const { return Iterator{map_.cbegin()}; }
+MemoryStorage::Iterator MemoryStorage::end() const { return Iterator{map_.cend()}; }
+
+MemoryStorage::Iterator::value_type MemoryStorage::Iterator::operator*() const {
+  return KwPair{.key = map_iterator_->first, .value = map_iterator_->second};
+}
+
+MemoryStorage::Iterator& MemoryStorage::Iterator::operator++() {
+  ++map_iterator_;
+  return *this;
+}
+
+MemoryStorage::Iterator MemoryStorage::Iterator::operator++(int) {
+  auto tmp = *this;
+  ++map_iterator_;
+  return tmp;
+}
 
 }  // namespace stewkk::db::logic::storage

@@ -8,7 +8,7 @@ struct KwPair {
   std::string key;
   std::string value;
 
-  bool operator==(const KwPair& other) const = default;
+  auto operator<=>(const KwPair& other) const = default;
 };
 
 }  // namespace stewkk::db::models::storage

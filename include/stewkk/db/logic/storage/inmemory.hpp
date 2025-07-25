@@ -12,8 +12,8 @@ using models::storage::KwPair;
 using result::Result;
 
 class MemoryStorage {
+private:
   using Map = std::unordered_map<std::string, std::string>;
-  using ConstIterator = Map::const_iterator;
 
 public:
   Result<KwPair> Get(std::string key);
@@ -21,8 +21,23 @@ public:
   void Insert(KwPair data);
   Result<> Update(KwPair data);
 
-  ConstIterator begin();
-  ConstIterator end();
+  struct Iterator {
+    using difference_type = std::ptrdiff_t;
+    using value_type = KwPair;
+
+    value_type operator*() const;
+
+    Iterator& operator++();
+    Iterator operator++(int);
+
+    bool operator==(const Iterator& other) const = default;
+
+    Map::const_iterator map_iterator_;
+  };
+  static_assert(std::input_iterator<Iterator>);
+
+  Iterator begin() const;
+  Iterator end() const;
 
 private:
   Map map_;

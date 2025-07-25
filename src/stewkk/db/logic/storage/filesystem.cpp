@@ -8,7 +8,7 @@ using result::Error;
 using result::Result;
 namespace fs = std::filesystem;
 
-Result<std::ofstream> CreateFile(fs::path path) {
+Result<std::ofstream> CreateBinaryFile(fs::path path) {
   try {
     std::ofstream res;
     res.exceptions(~std::ofstream::goodbit);
@@ -16,6 +16,17 @@ Result<std::ofstream> CreateFile(fs::path path) {
     return res;
   } catch (const std::exception& ex) {
     return Error("failed to create file at {}: {}", path.string(), ex.what());
+  }
+}
+
+Result<std::ifstream> OpenBinaryFile(fs::path path) {
+  try {
+    std::ifstream res;
+    res.exceptions(~std::ofstream::goodbit);
+    res.open(path, std::ifstream::in | std::ifstream::binary);
+    return res;
+  } catch (const std::exception& ex) {
+    return Error("failed to open file at {}: {}", path.string(), ex.what());
   }
 }
 
