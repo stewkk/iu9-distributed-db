@@ -19,6 +19,9 @@ static constexpr std::string_view kPathFormat = "{}/{}-{}";
 
 static constexpr std::string_view kDir = "/tmp/iu9-distributed-db";
 
+static constexpr std::string_view kFailedToLoad = "failed to load persistent storage";
+static constexpr std::string_view kFailedToCreate = "failed to create persistent storage";
+
 fs::path GetPath() {
   return std::format(kPathFormat, kDir, kVersion,
                      boost::uuids::to_string(boost::uuids::random_generator()()));
@@ -30,9 +33,9 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
   auto path = GetPath();
   auto f_opt = CreateBinaryFile(path);
   if (f_opt.has_failure()) {
-    return WrapError(std::move(f_opt), "failed to create persistent storage");
+    return WrapError(std::move(f_opt), kFailedToCreate);
   }
-  auto& f = f_opt.assume_value();
+  auto f = std::move(f_opt).assume_value();
 
   Metadata meta{.map_size = data.size()};
   f.write(reinterpret_cast<char*>(&meta), sizeof(meta));
@@ -52,7 +55,7 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
 
   auto res_opt = OpenBinaryFile(path);
   if (res_opt.has_failure()) {
-    return WrapError(std::move(res_opt), "failed to open persistent storage");
+    return WrapError(std::move(res_opt), kFailedToCreate);
   }
 
   return PersistentStorage(std::move(path), std::move(res_opt.value()), std::move(meta),
@@ -116,16 +119,21 @@ std::vector<PersistentKwPair> IndexBuilder::GetIndex() const { return index_; }
 Result<PersistentStorage> LoadPersistentStorage(fs::path path) {
   auto f_opt = OpenBinaryFile(path);
   if (f_opt.has_failure()) {
-    return WrapError(std::move(f_opt), "failed to load persistent storage");
+    return WrapError(std::move(f_opt), kFailedToLoad);
   }
-  auto& f = f_opt.assume_value();
+  auto f = std::move(f_opt).assume_value();
 
-  Metadata meta;
-  // TODO: add error checked function ReadFile
-  f.read(reinterpret_cast<char*>(&meta), sizeof(Metadata));
+  auto meta_opt = ReadFromFile<Metadata>(f);
+  if (meta_opt.has_failure()) {
+    return WrapError(std::move(meta_opt), kFailedToLoad);
+  }
+  auto meta = std::move(meta_opt).assume_value();
 
-  Index index(meta.map_size);
-  f.read(reinterpret_cast<char*>(index.data()), index.size() * sizeof(decltype(index)::value_type));
+  auto index_opt = ReadFromFile<Index>(f, meta.map_size);
+  if (index_opt.has_failure()) {
+    return WrapError(std::move(index_opt), kFailedToLoad);
+  }
+  auto index = std::move(index_opt).assume_value();
 
   return PersistentStorage(std::move(path), std::move(f), std::move(meta), std::move(index));
 }
