@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <format>
 
+#include <absl/log/log.h>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -31,6 +32,7 @@ fs::path GetPath() {
 
 Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
   auto path = GetPath();
+  LOG(INFO) << std::format("creating new persistent storage at {}", path.string());
   auto f_opt = CreateBinaryFile(path);
   if (f_opt.has_failure()) {
     return WrapError(std::move(f_opt), kFailedToCreate);
@@ -121,6 +123,7 @@ void IndexBuilder::AddRecord(const KwPair& pair) {
 std::vector<PersistentKwPair> IndexBuilder::GetIndex() const { return index_; }
 
 Result<PersistentStorage> LoadPersistentStorage(fs::path path) {
+  LOG(INFO) << std::format("loading persistent storage at {}", path.string());
   auto f_opt = OpenBinaryFile(path);
   if (f_opt.has_failure()) {
     return WrapError(std::move(f_opt), kFailedToLoad);

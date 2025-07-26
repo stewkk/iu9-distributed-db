@@ -52,6 +52,8 @@ target_link_options(libdb PRIVATE ${BASE_LINK_FLAGS})
 target_link_libraries(libdb
   Boost::outcome
   Boost::uuid
+  absl::log
+  absl::log_initialize
 )
 
 add_executable(iu9-db main.cpp)
