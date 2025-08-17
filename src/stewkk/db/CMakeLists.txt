@@ -52,6 +52,7 @@ target_link_options(libdb PRIVATE ${BASE_LINK_FLAGS})
 target_link_libraries(libdb
   Boost::outcome
   Boost::uuid
+  Boost::unordered
   absl::log
   absl::log_initialize
 )

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
+
+#include <boost/unordered/concurrent_flat_map.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/models/storage/kw_pair.hpp>
@@ -13,13 +15,26 @@ using result::Result;
 
 class MemoryStorage {
 private:
-  using Map = std::unordered_map<std::string, std::string>;
+  using Map = boost::concurrent_flat_map<std::string, std::string>;
 
 public:
   Result<KwPair> Get(std::string key);
   Result<> Remove(std::string key);
   void Insert(KwPair data);
   Result<> Update(KwPair data);
+
+  Map&& GetUnderlying() &&;
+
+private:
+  Map map_;
+};
+
+class ReadonlyMemoryStorage {
+private:
+  using Map = boost::unordered::unordered_flat_map<std::string, std::string>;
+
+public:
+  ReadonlyMemoryStorage(MemoryStorage&& storage);
 
   struct Iterator {
     using difference_type = std::ptrdiff_t;

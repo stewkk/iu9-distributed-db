@@ -9,7 +9,7 @@ using ::testing::Eq;
 
 namespace stewkk::db::logic::storage {
 
-MemoryStorage InitStorage() {
+ReadonlyMemoryStorage InitStorage() {
   MemoryStorage memory;
   for (size_t i = 0; i < 10; i++) {
     memory.Insert({
@@ -17,7 +17,7 @@ MemoryStorage InitStorage() {
         std::format("value{}", std::to_string(i)),
     });
   }
-  return memory;
+  return ReadonlyMemoryStorage(std::move(memory));
 }
 
 TEST(PersistentStorageTest, Get) {

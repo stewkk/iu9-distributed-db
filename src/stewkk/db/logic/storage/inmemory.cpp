@@ -12,19 +12,19 @@ constexpr static std::string_view kNotFound{"key {} not found in storage"};
 }  // namespace
 
 Result<KwPair> MemoryStorage::Get(std::string key) {
-  auto it = map_.find(key);
-  if (it == map_.end()) {
+  std::string value;
+  bool found = map_.visit(key, [&value](const auto& x) { value = x.second; });
+  if (!found) {
     return Error(kNotFound, key);
   }
-  return KwPair{.key = key, .value = it->second};
+  return KwPair{.key = std::move(key), .value = std::move(value)};
 }
 
 Result<> MemoryStorage::Remove(std::string key) {
-  auto it = map_.find(key);
-  if (it == map_.end()) {
+  bool is_erased = map_.erase(std::move(key));
+  if (!is_erased) {
     return Error(kNotFound, key);
   }
-  map_.erase(it);
   return Ok();
 }
 
@@ -33,27 +33,33 @@ void MemoryStorage::Insert(KwPair data) {
 }
 
 Result<> MemoryStorage::Update(KwPair data) {
-  auto it = map_.find(data.key);
-  if (it == map_.end()) {
-    return Error("trying to update non-existing key {}", data.key);
+  bool found = map_.visit(data.key, [&data](auto& x) { x.second = std::move(data.value); });
+  if (!found) {
+    return Error("trying to update non-existing key {}", std::move(data.key));
   }
-  it->second = std::move(data.value);
   return Ok();
 }
 
-MemoryStorage::Iterator MemoryStorage::begin() const { return Iterator{map_.cbegin()}; }
-MemoryStorage::Iterator MemoryStorage::end() const { return Iterator{map_.cend()}; }
+MemoryStorage::Map&& MemoryStorage::GetUnderlying() && { return std::move(map_); }
 
-MemoryStorage::Iterator::value_type MemoryStorage::Iterator::operator*() const {
+ReadonlyMemoryStorage::ReadonlyMemoryStorage(MemoryStorage&& storage)
+    : map_(std::move(storage).GetUnderlying()) {}
+
+ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::begin() const {
+  return Iterator{map_.cbegin()};
+}
+ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::end() const { return Iterator{map_.cend()}; }
+
+ReadonlyMemoryStorage::Iterator::value_type ReadonlyMemoryStorage::Iterator::operator*() const {
   return KwPair{.key = map_iterator_->first, .value = map_iterator_->second};
 }
 
-MemoryStorage::Iterator& MemoryStorage::Iterator::operator++() {
+ReadonlyMemoryStorage::Iterator& ReadonlyMemoryStorage::Iterator::operator++() {
   ++map_iterator_;
   return *this;
 }
 
-MemoryStorage::Iterator MemoryStorage::Iterator::operator++(int) {
+ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::Iterator::operator++(int) {
   auto tmp = *this;
   ++map_iterator_;
   return tmp;
