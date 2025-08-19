@@ -33,6 +33,7 @@ add_library(libdb
   logic/storage/inmemory.cpp
   logic/storage/persistent.cpp
   logic/storage/filesystem.cpp
+  logic/recovery/wal_writer.cpp
   logic/result/result.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
@@ -53,6 +54,8 @@ target_link_libraries(libdb
   Boost::outcome
   Boost::uuid
   Boost::unordered
+  Boost::asio
+  Boost::thread
   absl::log
   absl::log_initialize
 )
