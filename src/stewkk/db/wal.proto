@@ -1,0 +1,25 @@
+syntax = "proto2";
+
+package wal;
+
+message Remove {
+  optional string key = 1;
+};
+
+message Insert {
+  optional string key = 1;
+  optional string value = 2;
+};
+
+message Update {
+  optional string key = 1;
+  optional string value = 2;
+};
+
+message Entry {
+  oneof operation_oneof {
+    Remove remove = 1;
+    Insert insert = 2;
+    Update update = 3;
+  }
+}

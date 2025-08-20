@@ -29,6 +29,32 @@ target_link_libraries(my_grpc_proto
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF})
 
+get_filename_component(wal_proto "wal.proto" ABSOLUTE)
+get_filename_component(wal_proto_path "${wal_proto}" PATH)
+set(wal_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/wal.pb.cc")
+set(wal_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/wal.pb.h")
+set(wal_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/wal.grpc.pb.cc")
+set(wal_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/wal.grpc.pb.h")
+add_custom_command(
+      OUTPUT "${wal_proto_srcs}" "${wal_proto_hdrs}" "${wal_grpc_srcs}" "${wal_grpc_hdrs}"
+      COMMAND ${_PROTOBUF_PROTOC}
+      ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
+        --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+        -I "${wal_proto_path}"
+        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+        "${wal_proto}"
+      DEPENDS "${wal_proto}")
+add_library(wal_grpc_proto
+  ${wal_grpc_srcs}
+  ${wal_grpc_hdrs}
+  ${wal_proto_srcs}
+  ${wal_proto_hdrs})
+target_link_libraries(wal_grpc_proto
+  absl::check
+  ${_REFLECTION}
+  ${_GRPC_GRPCPP}
+  ${_PROTOBUF_LIBPROTOBUF})
+
 add_library(libdb
   logic/storage/inmemory.cpp
   logic/storage/persistent.cpp
@@ -58,6 +84,9 @@ target_link_libraries(libdb
   Boost::thread
   absl::log
   absl::log_initialize
+  ${_REFLECTION}
+  ${_GRPC_GRPCPP}
+  ${_PROTOBUF_LIBPROTOBUF}
 )
 
 add_executable(iu9-db main.cpp)
@@ -71,6 +100,7 @@ target_compile_options(iu9-db PRIVATE ${BASE_COMPILE_FLAGS})
 target_link_libraries(iu9-db
   stewkk::libdb
   my_grpc_proto
+  wal_grpc_proto
   absl::check
   absl::flags
   absl::flags_parse

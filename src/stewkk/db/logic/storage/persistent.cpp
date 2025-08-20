@@ -67,7 +67,7 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
                            std::move(index));
 }
 
-PersistentStorage::PersistentStorage(fs::path path, std::ifstream fstream, Metadata metadata,
+PersistentStorage::PersistentStorage(fs::path path, std::ifstream&& fstream, Metadata metadata,
                                      std::vector<PersistentKwPair> index)
     : path_(std::move(path)),
       f_(std::move(fstream)),

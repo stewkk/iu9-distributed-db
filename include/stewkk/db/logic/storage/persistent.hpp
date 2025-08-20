@@ -19,7 +19,7 @@ using Index = std::vector<PersistentKwPair>;
 
 class PersistentStorage {
 public:
-  PersistentStorage(fs::path path, std::ifstream stream, Metadata metadata, Index index);
+  PersistentStorage(fs::path path, std::ifstream&& stream, Metadata metadata, Index index);
   Result<KwPair> Get(std::string_view key);
   fs::path Path() const;
 
