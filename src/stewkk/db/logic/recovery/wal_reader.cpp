@@ -11,6 +11,7 @@
 namespace stewkk::db::logic::recovery {
 
 Result<std::vector<Operation>> ReadWAL(fs::path path) {
+  LOG(INFO) << std::format("loading WAL file: {}", path.string());
   auto f_opt = filesystem::OpenBinaryFD(path);
   if (f_opt.has_failure()) {
     return result::WrapError(std::move(f_opt), "failed to open WAL file");
@@ -28,9 +29,10 @@ Result<std::vector<Operation>> ReadWAL(fs::path path) {
       break;
     }
     if (!is_ok) {
-      return result::Error("TODO: error!");
+      return result::Error("failed to parse WAL file: {}", path.string());
     }
 
+    // NOTE: better to move into separate function
     if (entry.has_insert()) {
       result.push_back(Operation{
           OperationType::kInsert,
