@@ -4,9 +4,6 @@
 #include <format>
 
 #include <absl/log/log.h>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 namespace stewkk::db::logic::storage {
 
@@ -15,32 +12,23 @@ using result::WrapError;
 
 namespace {
 
-static constexpr std::string_view kVersion = "v1";
-static constexpr std::string_view kPathFormat = "{}/{}-{}";
-
-static constexpr std::string_view kDir = "/tmp/iu9-distributed-db";
-
 static constexpr std::string_view kFailedToLoad = "failed to load persistent storage";
 static constexpr std::string_view kFailedToCreate = "failed to create persistent storage";
-
-fs::path GetPath() {
-  return std::format(kPathFormat, kDir, kVersion,
-                     boost::uuids::to_string(boost::uuids::random_generator()()));
-}
 
 }  // namespace
 
 Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
-  auto path = GetPath();
+  auto extension = "data";
+  auto path = filesystem::GetPath(extension);
   LOG(INFO) << std::format("creating new persistent storage at {}", path.string());
-  auto f_opt = CreateBinaryFile(path);
+  auto f_opt = filesystem::CreateBinaryFile(path);
   if (f_opt.has_failure()) {
     return WrapError(std::move(f_opt), kFailedToCreate);
   }
   auto f = std::move(f_opt).assume_value();
 
   Metadata meta{.map_size = data.size()};
-  if (auto res = WriteToFile(f, meta); res.has_failure()) {
+  if (auto res = filesystem::WriteToFile(f, meta); res.has_failure()) {
     return WrapError(std::move(res), kFailedToCreate);
   }
 
@@ -50,7 +38,7 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
     index_builder.AddRecord(kw_pair);
   }
   auto index = index_builder.GetIndex();
-  if (auto res = WriteToFile(f, index); res.has_failure()) {
+  if (auto res = filesystem::WriteToFile(f, index); res.has_failure()) {
     return WrapError(std::move(res), kFailedToCreate);
   }
 
@@ -58,7 +46,7 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<KwPair> data) {
     f << std::move(el).key << std::move(el).value;
   }
 
-  auto res_opt = OpenBinaryFile(path);
+  auto res_opt = filesystem::OpenBinaryFile(path);
   if (res_opt.has_failure()) {
     return WrapError(std::move(res_opt), kFailedToCreate);
   }
@@ -124,19 +112,19 @@ std::vector<PersistentKwPair> IndexBuilder::GetIndex() const { return index_; }
 
 Result<PersistentStorage> LoadPersistentStorage(fs::path path) {
   LOG(INFO) << std::format("loading persistent storage at {}", path.string());
-  auto f_opt = OpenBinaryFile(path);
+  auto f_opt = filesystem::OpenBinaryFile(path);
   if (f_opt.has_failure()) {
     return WrapError(std::move(f_opt), kFailedToLoad);
   }
   auto f = std::move(f_opt).assume_value();
 
-  auto meta_opt = ReadFromFile<Metadata>(f);
+  auto meta_opt = filesystem::ReadFromFile<Metadata>(f);
   if (meta_opt.has_failure()) {
     return WrapError(std::move(meta_opt), kFailedToLoad);
   }
   auto meta = std::move(meta_opt).assume_value();
 
-  auto index_opt = ReadFromFile<Index>(f, meta.map_size);
+  auto index_opt = filesystem::ReadFromFile<Index>(f, meta.map_size);
   if (index_opt.has_failure()) {
     return WrapError(std::move(index_opt), kFailedToLoad);
   }

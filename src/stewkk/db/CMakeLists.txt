@@ -58,7 +58,7 @@ target_link_libraries(wal_grpc_proto
 add_library(libdb
   logic/storage/inmemory.cpp
   logic/storage/persistent.cpp
-  logic/storage/filesystem.cpp
+  logic/filesystem/filesystem.cpp
   logic/recovery/wal_writer.cpp
   logic/result/result.cpp
 )

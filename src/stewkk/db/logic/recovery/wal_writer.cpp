@@ -1,29 +1,16 @@
 #include <stewkk/db/logic/recovery/wal_writer.hpp>
 
 #include <absl/log/log.h>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 #include <wal.pb.h>
 
-#include <stewkk/db/logic/storage/filesystem.hpp>
+#include <stewkk/db/logic/filesystem/filesystem.hpp>
 
 namespace stewkk::db::logic::recovery {
 
 namespace {
 
-static constexpr std::string_view kVersion = "v1";
-static constexpr std::string_view kPathFormat = "{}/{}-{}.wal";
-
-static constexpr std::string_view kDir = "/tmp/iu9-distributed-db";
-
 static constexpr std::string_view kFailedToCreate = "failed to create WAL";
-
-fs::path GetPath() {
-  return std::format(kPathFormat, kDir, kVersion,
-                     boost::uuids::to_string(boost::uuids::random_generator()()));
-}
 
 }  // namespace
 
@@ -66,9 +53,10 @@ Result<> WALWriter::Update(KwPair data) {
 }
 
 Result<WALWriter> NewWALWriter() {
-  auto path = GetPath();
+  auto extension = "wal";
+  auto path = filesystem::GetPath(extension);
   LOG(INFO) << std::format("creating new WAL at {}", path.string());
-  auto f_opt = storage::CreateBinaryFile(path);
+  auto f_opt = filesystem::CreateBinaryFile(path);
   if (f_opt.has_failure()) {
     return result::WrapError(std::move(f_opt), kFailedToCreate);
   }

@@ -6,7 +6,7 @@
 
 #include <stewkk/db/logic/result/result.hpp>
 
-namespace stewkk::db::logic::storage {
+namespace stewkk::db::logic::filesystem {
 
 using result::Error;
 using result::Ok;
@@ -15,6 +15,8 @@ namespace fs = std::filesystem;
 
 static constexpr std::string_view kFailedToRead = "failed to read file: {}";
 static constexpr std::string_view kFailedToWrite = "failed to write file: {}";
+
+fs::path GetPath(std::string_view extension);
 
 Result<std::ofstream> CreateBinaryFile(fs::path path);
 
@@ -69,4 +71,4 @@ template <typename T> Result<> WriteToFile(std::ofstream& f, const std::vector<T
   }
 }
 
-}  // namespace stewkk::db::logic::storage
+}  // namespace stewkk::db::logic::filesystem

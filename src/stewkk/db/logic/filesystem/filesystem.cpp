@@ -1,12 +1,25 @@
-#include <stewkk/db/logic/storage/filesystem.hpp>
+#include <stewkk/db/logic/filesystem/filesystem.hpp>
+
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <stewkk/db/logic/result/result.hpp>
 
-namespace stewkk::db::logic::storage {
+namespace stewkk::db::logic::filesystem {
 
 using result::Error;
 using result::Result;
 namespace fs = std::filesystem;
+
+namespace {
+
+static constexpr std::string_view kVersion = "v1";
+static constexpr std::string_view kPathFormat = "{}/{}-{}.{}";
+
+static constexpr std::string_view kDir = "/tmp/iu9-distributed-db";
+
+}  // namespace
 
 Result<std::ofstream> CreateBinaryFile(fs::path path) {
   try {
@@ -30,4 +43,9 @@ Result<std::ifstream> OpenBinaryFile(fs::path path) {
   }
 }
 
-}  // namespace stewkk::db::logic::storage
+fs::path GetPath(std::string_view extension) {
+  return std::format(kPathFormat, kDir, kVersion,
+                     boost::uuids::to_string(boost::uuids::random_generator()()), extension);
+}
+
+}  // namespace stewkk::db::logic::filesystem
