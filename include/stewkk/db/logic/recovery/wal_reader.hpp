@@ -1,7 +1,6 @@
 #pragma once
 
 #include <filesystem>
-#include <fstream>
 
 #include <stewkk/db/logic/result/result.hpp>
 

@@ -23,6 +23,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.nodePackages.pyright
     pkgs.plantuml
     pkgs.systemd
+    pkgs.gdb
 
     # keep this line if you use bash
     pkgs.bashInteractive

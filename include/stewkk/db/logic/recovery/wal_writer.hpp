@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/spawn.hpp>
 #include <boost/asio/strand.hpp>
 
 #include <stewkk/db/logic/result/result.hpp>
@@ -19,9 +20,9 @@ class WALWriter {
 public:
   WALWriter(boost::asio::io_context& context, fs::path path, std::ofstream&& stream);
 
-  Result<> Remove(std::string key);
-  Result<> Insert(KwPair data);
-  Result<> Update(KwPair data);
+  Result<> Remove(boost::asio::yield_context& yield, std::string key);
+  Result<> Insert(boost::asio::yield_context& yield, KwPair data);
+  Result<> Update(boost::asio::yield_context& yield, KwPair data);
 
   fs::path GetPath() const;
 

@@ -1,5 +1,7 @@
 #include <stewkk/db/logic/filesystem/filesystem.hpp>
 
+#include <fcntl.h>
+
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -41,6 +43,14 @@ Result<std::ifstream> OpenBinaryFile(fs::path path) {
   } catch (const std::exception& ex) {
     return Error("failed to open file at {}: {}", path.string(), ex.what());
   }
+}
+
+Result<std::int32_t> OpenBinaryFD(fs::path path) {
+  auto fd = open(path.c_str(), O_RDONLY);
+  if (fd == -1) {
+    return Error("failed to open file at {}", path.string());
+  }
+  return Ok(fd);
 }
 
 fs::path GetPath(std::string_view extension) {

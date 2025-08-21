@@ -22,6 +22,8 @@ Result<std::ofstream> CreateBinaryFile(fs::path path);
 
 Result<std::ifstream> OpenBinaryFile(fs::path path);
 
+Result<std::int32_t> OpenBinaryFD(fs::path path);
+
 template <typename> struct type {};
 
 template <typename T> Result<T> ReadFromFile(type<T>, std::ifstream& f) {

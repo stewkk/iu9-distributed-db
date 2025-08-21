@@ -1,6 +1,7 @@
 #include <stewkk/db/logic/recovery/wal_writer.hpp>
 
 #include <absl/log/log.h>
+#include <google/protobuf/util/delimited_message_util.h>
 
 #include <wal.pb.h>
 
@@ -17,13 +18,13 @@ static constexpr std::string_view kFailedToCreate = "failed to create WAL";
 WALWriter::WALWriter(boost::asio::io_context& context, fs::path path, std::ofstream&& stream)
     : path_(std::move(path)), f_(std::move(stream)), strand_(boost::asio::make_strand(context)) {}
 
-Result<> WALWriter::Remove(std::string key) {
+Result<> WALWriter::Remove(boost::asio::yield_context& yield, std::string key) {
   wal::Entry entry;
   auto* remove_op = entry.mutable_remove();
   remove_op->set_key(std::move(key));
   bool is_ok;
-  boost::asio::post(strand_, [&]() {
-    is_ok = entry.SerializeToOstream(&f_);
+  boost::asio::dispatch(strand_, [&]() {
+    is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
     f_.flush();
   });
   if (!is_ok) {
@@ -32,14 +33,14 @@ Result<> WALWriter::Remove(std::string key) {
   return result::Ok();
 }
 
-Result<> WALWriter::Insert(KwPair data) {
+Result<> WALWriter::Insert(boost::asio::yield_context& yield, KwPair data) {
   wal::Entry entry;
   auto* insert_op = entry.mutable_insert();
   insert_op->set_key(std::move(data).key);
   insert_op->set_value(std::move(data).value);
   bool is_ok;
-  boost::asio::post(strand_, [&]() {
-    is_ok = entry.SerializeToOstream(&f_);
+  boost::asio::dispatch(strand_, [&]() {
+    is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
     f_.flush();
   });
   if (!is_ok) {
@@ -48,14 +49,14 @@ Result<> WALWriter::Insert(KwPair data) {
   return result::Ok();
 }
 
-Result<> WALWriter::Update(KwPair data) {
+Result<> WALWriter::Update(boost::asio::yield_context& yield, KwPair data) {
   wal::Entry entry;
   auto* update_op = entry.mutable_update();
   update_op->set_key(std::move(data).key);
   update_op->set_value(std::move(data).value);
   bool is_ok;
-  boost::asio::post(strand_, [&]() {
-    is_ok = entry.SerializeToOstream(&f_);
+  boost::asio::dispatch(strand_, [&]() {
+    is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
     f_.flush();
   });
   if (!is_ok) {
