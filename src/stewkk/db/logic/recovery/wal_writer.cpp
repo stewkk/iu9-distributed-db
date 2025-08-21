@@ -14,15 +14,18 @@ static constexpr std::string_view kFailedToCreate = "failed to create WAL";
 
 }  // namespace
 
-WALWriter::WALWriter(fs::path path, std::ofstream&& stream)
-    : path_(std::move(path)), f_(std::move(stream)) {}
+WALWriter::WALWriter(boost::asio::io_context& context, fs::path path, std::ofstream&& stream)
+    : path_(std::move(path)), f_(std::move(stream)), strand_(boost::asio::make_strand(context)) {}
 
 Result<> WALWriter::Remove(std::string key) {
   wal::Entry entry;
   auto* remove_op = entry.mutable_remove();
   remove_op->set_key(std::move(key));
-  bool is_ok = entry.SerializeToOstream(&f_);
-  f_.flush();
+  bool is_ok;
+  boost::asio::post(strand_, [&]() {
+    is_ok = entry.SerializeToOstream(&f_);
+    f_.flush();
+  });
   if (!is_ok) {
     return result::Error("failed to write log entry");
   }
@@ -34,8 +37,11 @@ Result<> WALWriter::Insert(KwPair data) {
   auto* insert_op = entry.mutable_insert();
   insert_op->set_key(std::move(data).key);
   insert_op->set_value(std::move(data).value);
-  bool is_ok = entry.SerializeToOstream(&f_);
-  f_.flush();
+  bool is_ok;
+  boost::asio::post(strand_, [&]() {
+    is_ok = entry.SerializeToOstream(&f_);
+    f_.flush();
+  });
   if (!is_ok) {
     return result::Error("failed to write log entry");
   }
@@ -47,15 +53,18 @@ Result<> WALWriter::Update(KwPair data) {
   auto* update_op = entry.mutable_update();
   update_op->set_key(std::move(data).key);
   update_op->set_value(std::move(data).value);
-  bool is_ok = entry.SerializeToOstream(&f_);
-  f_.flush();
+  bool is_ok;
+  boost::asio::post(strand_, [&]() {
+    is_ok = entry.SerializeToOstream(&f_);
+    f_.flush();
+  });
   if (!is_ok) {
     return result::Error("failed to write log entry");
   }
   return result::Ok();
 }
 
-Result<WALWriter> NewWALWriter() {
+Result<WALWriter> NewWALWriter(boost::asio::io_context& context) {
   auto extension = "wal";
   auto path = filesystem::GetPath(extension);
   LOG(INFO) << std::format("creating new WAL at {}", path.string());
@@ -65,7 +74,7 @@ Result<WALWriter> NewWALWriter() {
   }
   auto f = std::move(f_opt).assume_value();
 
-  return WALWriter(std::move(path), std::move(f));
+  return WALWriter(context, std::move(path), std::move(f));
 }
 
 fs::path WALWriter::GetPath() const { return path_; }

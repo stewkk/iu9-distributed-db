@@ -3,6 +3,9 @@
 #include <filesystem>
 #include <fstream>
 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/strand.hpp>
+
 #include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/models/storage/kw_pair.hpp>
 
@@ -14,7 +17,7 @@ namespace fs = std::filesystem;
 
 class WALWriter {
 public:
-  WALWriter(fs::path path, std::ofstream&& stream);
+  WALWriter(boost::asio::io_context& context, fs::path path, std::ofstream&& stream);
 
   Result<> Remove(std::string key);
   Result<> Insert(KwPair data);
@@ -28,8 +31,9 @@ private:
 private:
   fs::path path_;
   std::ofstream f_;
+  boost::asio::strand<boost::asio::io_context::executor_type> strand_;
 };
 
-Result<WALWriter> NewWALWriter();
+Result<WALWriter> NewWALWriter(boost::asio::io_context& context);
 
 }  // namespace stewkk::db::logic::recovery
