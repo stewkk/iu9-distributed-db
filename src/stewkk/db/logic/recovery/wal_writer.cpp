@@ -22,6 +22,7 @@ Result<> WALWriter::Remove(std::string key) {
   auto* remove_op = entry.mutable_remove();
   remove_op->set_key(std::move(key));
   bool is_ok = entry.SerializeToOstream(&f_);
+  f_.flush();
   if (!is_ok) {
     return result::Error("failed to write log entry");
   }
@@ -34,6 +35,7 @@ Result<> WALWriter::Insert(KwPair data) {
   insert_op->set_key(std::move(data).key);
   insert_op->set_value(std::move(data).value);
   bool is_ok = entry.SerializeToOstream(&f_);
+  f_.flush();
   if (!is_ok) {
     return result::Error("failed to write log entry");
   }
@@ -46,6 +48,7 @@ Result<> WALWriter::Update(KwPair data) {
   update_op->set_key(std::move(data).key);
   update_op->set_value(std::move(data).value);
   bool is_ok = entry.SerializeToOstream(&f_);
+  f_.flush();
   if (!is_ok) {
     return result::Error("failed to write log entry");
   }
@@ -64,5 +67,7 @@ Result<WALWriter> NewWALWriter() {
 
   return WALWriter(std::move(path), std::move(f));
 }
+
+fs::path WALWriter::GetPath() const { return path_; }
 
 }  // namespace stewkk::db::logic::recovery

@@ -60,6 +60,7 @@ add_library(libdb
   logic/storage/persistent.cpp
   logic/filesystem/filesystem.cpp
   logic/recovery/wal_writer.cpp
+  logic/recovery/wal_reader.cpp
   logic/result/result.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)

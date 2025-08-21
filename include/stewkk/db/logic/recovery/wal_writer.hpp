@@ -20,6 +20,8 @@ public:
   Result<> Insert(KwPair data);
   Result<> Update(KwPair data);
 
+  fs::path GetPath() const;
+
 private:
   void Log();
 
