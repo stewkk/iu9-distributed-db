@@ -29,6 +29,7 @@ Result<std::vector<Operation>> ReadWAL(fs::path path) {
       break;
     }
     if (!is_ok) {
+      // TODO: maybe just log error and break?
       return result::Error("failed to parse WAL file: {}", path.string());
     }
 
@@ -55,6 +56,17 @@ Result<std::vector<Operation>> ReadWAL(fs::path path) {
   }
 
   return result::Ok(std::move(result));
+}
+
+std::string ToString(OperationType type) {
+  switch (type) {
+    case OperationType::kInsert:
+      return "insert";
+    case OperationType::kUpdate:
+      return "update";
+    case OperationType::kRemove:
+      return "remove";
+  }
 }
 
 }  // namespace stewkk::db::logic::recovery

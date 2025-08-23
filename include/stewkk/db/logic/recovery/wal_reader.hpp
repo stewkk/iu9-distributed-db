@@ -11,6 +11,8 @@ namespace fs = std::filesystem;
 
 enum class OperationType { kInsert, kUpdate, kRemove };
 
+std::string ToString(OperationType type);
+
 struct Operation {
   OperationType type;
   std::string key;
