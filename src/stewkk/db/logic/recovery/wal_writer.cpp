@@ -3,8 +3,6 @@
 #include <absl/log/log.h>
 #include <google/protobuf/util/delimited_message_util.h>
 
-#include <wal.pb.h>
-
 #include <stewkk/db/logic/filesystem/filesystem.hpp>
 
 namespace stewkk::db::logic::recovery {
@@ -15,26 +13,30 @@ static constexpr std::string_view kFailedToCreate = "failed to create WAL";
 
 }  // namespace
 
-WALWriter::WALWriter(boost::asio::thread_pool& context, fs::path path, std::ofstream&& stream)
+WALWriter::WALWriter(boost::asio::executor executor, fs::path path, std::ofstream&& stream)
     : path_(std::move(path)),
       f_(std::move(stream)),
-      strand_(boost::asio::make_strand(context)),
-      pool_(context) {}
+      strand_(boost::asio::make_strand(executor)),
+      executor_(std::move(executor)) {}
+
+Result<> WALWriter::WriteEntry(boost::asio::yield_context yield, wal::Entry entry) {
+  boost::asio::post(boost::asio::bind_executor(strand_, yield));
+  bool is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
+  f_.flush();
+  boost::asio::post(boost::asio::bind_executor(executor_, yield));
+
+  if (!is_ok) {
+    return result::Error("failed to write log entry");
+  }
+  return result::Ok();
+}
 
 Result<> WALWriter::Remove(boost::asio::yield_context yield, std::string key) {
   wal::Entry entry;
   auto* remove_op = entry.mutable_remove();
   remove_op->set_key(std::move(key));
 
-  boost::asio::post(boost::asio::bind_executor(strand_, yield));
-  bool is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
-  f_.flush();
-  boost::asio::post(boost::asio::bind_executor(pool_, yield));
-
-  if (!is_ok) {
-    return result::Error("failed to write log entry");
-  }
-  return result::Ok();
+  return WriteEntry(std::move(yield), std::move(entry));
 }
 
 Result<> WALWriter::Insert(boost::asio::yield_context yield, KwPair data) {
@@ -43,15 +45,7 @@ Result<> WALWriter::Insert(boost::asio::yield_context yield, KwPair data) {
   insert_op->set_key(std::move(data).key);
   insert_op->set_value(std::move(data).value);
 
-  boost::asio::post(boost::asio::bind_executor(strand_, yield));
-  bool is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
-  f_.flush();
-  boost::asio::post(boost::asio::bind_executor(pool_, yield));
-
-  if (!is_ok) {
-    return result::Error("failed to write log entry");
-  }
-  return result::Ok();
+  return WriteEntry(std::move(yield), std::move(entry));
 }
 
 Result<> WALWriter::Update(boost::asio::yield_context yield, KwPair data) {
@@ -60,18 +54,10 @@ Result<> WALWriter::Update(boost::asio::yield_context yield, KwPair data) {
   update_op->set_key(std::move(data).key);
   update_op->set_value(std::move(data).value);
 
-  boost::asio::post(boost::asio::bind_executor(strand_, yield));
-  bool is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
-  f_.flush();
-  boost::asio::post(boost::asio::bind_executor(pool_, yield));
-
-  if (!is_ok) {
-    return result::Error("failed to write log entry");
-  }
-  return result::Ok();
+  return WriteEntry(std::move(yield), std::move(entry));
 }
 
-Result<WALWriter> NewWALWriter(boost::asio::thread_pool& context) {
+Result<WALWriter> NewWALWriter(boost::asio::executor executor) {
   auto extension = "wal";
   auto path = filesystem::GetPath(extension);
   LOG(INFO) << std::format("creating new WAL at {}", path.string());
@@ -81,7 +67,7 @@ Result<WALWriter> NewWALWriter(boost::asio::thread_pool& context) {
   }
   auto f = std::move(f_opt).assume_value();
 
-  return WALWriter(context, std::move(path), std::move(f));
+  return WALWriter(std::move(executor), std::move(path), std::move(f));
 }
 
 fs::path WALWriter::GetPath() const { return path_; }

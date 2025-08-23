@@ -1,8 +1,5 @@
 #include <gmock/gmock.h>
 
-#include <absl/log/log.h>
-#include <boost/asio/detached.hpp>
-#include <boost/asio/io_context.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/thread_pool.hpp>
 
@@ -18,15 +15,12 @@ TEST(WALTest, WriteAndReadLogs) {
   boost::asio::thread_pool pool{1};
   fs::path path;
   {
-    auto writer = NewWALWriter(pool).value();
-    boost::asio::spawn(
-        pool,
-        [&](boost::asio::yield_context yield) {
-          writer.Remove(yield, "blabla").value();
-          writer.Insert(yield, KwPair{"a", "b"}).value();
-          writer.Update(yield, KwPair{"c", "d"}).value();
-        },
-        boost::asio::detached);
+    auto writer = NewWALWriter(pool.get_executor()).value();
+    boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
+      writer.Remove(yield, "blabla").value();
+      writer.Insert(yield, KwPair{"a", "b"}).value();
+      writer.Update(yield, KwPair{"c", "d"}).value();
+    });
     pool.join();
     path = writer.GetPath();
   }
@@ -45,20 +39,15 @@ TEST(WALTest, Concurrent) {
 
   fs::path path;
   {
-    auto writer = NewWALWriter(pool).value();
+    auto writer = NewWALWriter(pool.get_executor()).value();
     path = writer.GetPath();
 
-    auto strand = boost::asio::make_strand(pool);
-
     for (int i = 0; i < 20; ++i) {
-      boost::asio::spawn(
-          pool,
-          [i, &writer, &strand](boost::asio::yield_context yield) {
-            writer.Remove(yield, "blabla").value();
-            writer.Insert(yield, KwPair{"a", "b"}).value();
-            writer.Update(yield, KwPair{"c", "d"}).value();
-          },
-          boost::asio::detached);
+      boost::asio::spawn(pool, [&writer](boost::asio::yield_context yield) {
+        writer.Remove(yield, "blabla").value();
+        writer.Insert(yield, KwPair{"a", "b"}).value();
+        writer.Update(yield, KwPair{"c", "d"}).value();
+      });
     }
 
     pool.join();
