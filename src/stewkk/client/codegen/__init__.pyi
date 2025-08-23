@@ -1,1 +1,1 @@
-from . import example_pb2
+from . import api_pb2

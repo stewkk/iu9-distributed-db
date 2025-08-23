@@ -3,19 +3,19 @@
 import logging
 
 import grpc
-import codegen.example_pb2 as example_pb2
-import codegen.example_pb2_grpc as example_pb2_grpc
+import codegen.api_pb2 as api_pb2
+import codegen.api_pb2_grpc as api_pb2_grpc
 
 
 def run():
     # NOTE(gRPC Python Team): .close() is possible on a channel and should be
     # used in circumstances in which the with statement does not fit the needs
     # of the code.
-    print("Will try to greet world ...")
+    print("Requesting db ...")
     with grpc.insecure_channel("localhost:50051") as channel:
-        stub = example_pb2_grpc.GreeterStub(channel)
-        response = stub.SayHello(example_pb2.HelloRequest(name="you"))
-    print("Greeter client received: " + response.message)
+        stub = api_pb2_grpc.DbStub(channel)
+        response = stub.Get(api_pb2.KeyRequest(key="oaoa"))
+    print("Received: " + response.value)
 
 
 if __name__ == "__main__":

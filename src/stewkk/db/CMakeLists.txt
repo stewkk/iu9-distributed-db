@@ -2,29 +2,29 @@ include(FetchGRPC)
 include(FetchBoost)
 include(FetchAsioGrpc)
 
-get_filename_component(my_proto "example.proto" ABSOLUTE)
-get_filename_component(my_proto_path "${my_proto}" PATH)
+get_filename_component(api_proto "api.proto" ABSOLUTE)
+get_filename_component(api_proto_path "${api_proto}" PATH)
 
-set(my_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/example.pb.cc")
-set(my_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/example.pb.h")
-set(my_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/example.grpc.pb.cc")
-set(my_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/example.grpc.pb.h")
+set(api_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/api.pb.cc")
+set(api_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/api.pb.h")
+set(api_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/api.grpc.pb.cc")
+set(api_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/api.grpc.pb.h")
 add_custom_command(
-      OUTPUT "${my_proto_srcs}" "${my_proto_hdrs}" "${my_grpc_srcs}" "${my_grpc_hdrs}"
+      OUTPUT "${api_proto_srcs}" "${api_proto_hdrs}" "${api_grpc_srcs}" "${api_grpc_hdrs}"
       COMMAND ${_PROTOBUF_PROTOC}
       ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
         --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
-        -I "${my_proto_path}"
+        -I "${api_proto_path}"
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
-        "${my_proto}"
-      DEPENDS "${my_proto}")
+        "${api_proto}"
+      DEPENDS "${api_proto}")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-add_library(my_grpc_proto
-  ${my_grpc_srcs}
-  ${my_grpc_hdrs}
-  ${my_proto_srcs}
-  ${my_proto_hdrs})
-target_link_libraries(my_grpc_proto
+add_library(api_grpc_proto
+  ${api_grpc_srcs}
+  ${api_grpc_hdrs}
+  ${api_proto_srcs}
+  ${api_proto_hdrs})
+target_link_libraries(api_grpc_proto
   absl::check
   ${_REFLECTION}
   ${_GRPC_GRPCPP}
@@ -103,7 +103,7 @@ target_compile_options(iu9-db PRIVATE ${BASE_COMPILE_FLAGS})
 target_link_libraries(iu9-db
   stewkk::libdb
   asio-grpc::asio-grpc
-  my_grpc_proto
+  api_grpc_proto
   wal_grpc_proto
   absl::check
   absl::flags

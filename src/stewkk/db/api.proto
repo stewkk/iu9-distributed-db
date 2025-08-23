@@ -1,0 +1,22 @@
+service Db {
+  rpc Insert (KeyValueRequest) returns (EmptyReply) {}
+  rpc Update (KeyValueRequest) returns (EmptyReply) {}
+  rpc Remove (KeyRequest)      returns (EmptyReply) {}
+  rpc Get    (KeyRequest)      returns (GetReply)   {}
+}
+
+message KeyValueRequest {
+  optional string key = 1;
+  optional string value = 2;
+}
+
+message KeyRequest {
+  optional string key = 1;
+}
+
+message EmptyReply {
+}
+
+message GetReply {
+  optional string value = 1;
+}
