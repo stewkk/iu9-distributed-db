@@ -63,6 +63,7 @@ add_library(libdb
   logic/recovery/wal_writer.cpp
   logic/recovery/wal_reader.cpp
   logic/result/result.cpp
+  views/add_handlers.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
 target_compile_features(libdb PUBLIC cxx_std_20)
