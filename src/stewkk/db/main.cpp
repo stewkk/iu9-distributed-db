@@ -1,13 +1,14 @@
 #include <cstdint>
 #include <format>
 #include <memory>
+#include <thread>
 
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/health_check_service_interface.h>
 #include <agrpc/register_yield_rpc_handler.hpp>
 
-#include <boost/asio/detached.hpp>
+#include <boost/thread.hpp>
 
 #include <absl/flags/flag.h>
 #include <absl/flags/parse.h>
@@ -31,15 +32,20 @@ struct RethrowFirstArg {
 void RunServer(uint16_t port) {
   auto server_address = std::format("0.0.0.0:{}", port);
   Greeter::AsyncService service;
+  const auto thread_count = std::thread::hardware_concurrency() - 1;
 
   grpc::EnableDefaultHealthCheckService(true);
   grpc::reflection::InitProtoReflectionServerBuilderPlugin();
   grpc::ServerBuilder builder;
-  agrpc::GrpcContext grpc_context{builder.AddCompletionQueue()};
+  agrpc::GrpcContext grpc_context{builder.AddCompletionQueue(), thread_count};
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-  LOG(INFO) << "Server listening on " << server_address;
+
+  boost::thread_group threads;
+  for (int i = 0; i < thread_count; ++i) {
+    threads.create_thread([&grpc_context]() { grpc_context.run(); });
+  }
 
   using RPC = agrpc::ServerRPC<&Greeter::AsyncService::RequestSayHello>;
   agrpc::register_yield_rpc_handler<RPC>(
@@ -52,7 +58,9 @@ void RunServer(uint16_t port) {
       },
       RethrowFirstArg{});
 
+  LOG(INFO) << "Server listening on " << server_address;
   grpc_context.run();
+  threads.join_all();
 }
 
 int main(int argc, char** argv) {
