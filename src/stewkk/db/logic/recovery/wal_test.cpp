@@ -43,6 +43,7 @@ TEST(WALTest, Concurrent) {
     path = writer.GetPath();
 
     for (int i = 0; i < 20; ++i) {
+      // NOTE: exception causes std::terminate here
       boost::asio::spawn(pool, [&writer](boost::asio::yield_context yield) {
         writer.Remove(yield, "blabla").value();
         writer.Insert(yield, KwPair{"a", "b"}).value();

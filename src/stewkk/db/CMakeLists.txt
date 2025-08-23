@@ -1,5 +1,6 @@
 include(FetchGRPC)
 include(FetchBoost)
+include(FetchAsioGrpc)
 
 get_filename_component(my_proto "example.proto" ABSOLUTE)
 get_filename_component(my_proto_path "${my_proto}" PATH)
@@ -85,6 +86,7 @@ target_link_libraries(libdb
   Boost::thread
   absl::log
   absl::log_initialize
+  asio-grpc::asio-grpc
   ${_REFLECTION}
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF}
@@ -100,6 +102,7 @@ set_target_properties(iu9-db PROPERTIES
 target_compile_options(iu9-db PRIVATE ${BASE_COMPILE_FLAGS})
 target_link_libraries(iu9-db
   stewkk::libdb
+  asio-grpc::asio-grpc
   my_grpc_proto
   wal_grpc_proto
   absl::check
