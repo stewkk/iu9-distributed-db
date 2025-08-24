@@ -1,15 +1,15 @@
 #pragma once
 
-#include <agrpc/server_rpc.hpp>
 #include <boost/asio/spawn.hpp>
 
-#include <api.grpc.pb.h>
+#include <stewkk/db/logic/controllers/remove.hpp>
+#include <stewkk/db/views/request_types.hpp>
 
 namespace stewkk::db::views {
 
-using RemoveRPC = agrpc::ServerRPC<&Db::AsyncService::RequestRemove>;
+using logic::controllers::RemoveController;
 
-void RemoveHandler(RemoveRPC& rpc, RemoveRPC::Request& request,
+void RemoveHandler(RemoveController& controller, RemoveRPC& rpc, RemoveRPC::Request& request,
                    const boost::asio::yield_context& yield);
 
 }  // namespace stewkk::db::views

@@ -1,15 +1,15 @@
 #pragma once
 
-#include <agrpc/server_rpc.hpp>
 #include <boost/asio/spawn.hpp>
 
-#include <api.grpc.pb.h>
+#include <stewkk/db/logic/controllers/update.hpp>
+#include <stewkk/db/views/request_types.hpp>
 
 namespace stewkk::db::views {
 
-using UpdateRPC = agrpc::ServerRPC<&Db::AsyncService::RequestUpdate>;
+using logic::controllers::UpdateController;
 
-void UpdateHandler(UpdateRPC& rpc, UpdateRPC::Request& request,
+void UpdateHandler(UpdateController& controller, UpdateRPC& rpc, UpdateRPC::Request& request,
                    const boost::asio::yield_context& yield);
 
 }  // namespace stewkk::db::views

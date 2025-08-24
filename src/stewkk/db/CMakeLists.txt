@@ -63,7 +63,12 @@ add_library(libdb
   logic/recovery/wal_writer.cpp
   logic/recovery/wal_reader.cpp
   logic/result/result.cpp
-  views/add_handlers.cpp
+  logic/controllers/insert.cpp
+  logic/controllers/update.cpp
+  logic/controllers/remove.cpp
+  logic/controllers/get.cpp
+  views/register_handlers.cpp
+  views/handlers_proxy.cpp
   views/insert.cpp
   views/update.cpp
   views/remove.cpp

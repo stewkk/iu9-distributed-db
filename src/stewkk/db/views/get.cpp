@@ -2,9 +2,17 @@
 
 namespace stewkk::db::views {
 
-void GetHandler(GetRPC& rpc, GetRPC::Request& request, const boost::asio::yield_context& yield) {
+using logic::controllers::KeyDTO;
+
+void GetHandler(GetController& controller, GetRPC& rpc, GetRPC::Request& request,
+                const boost::asio::yield_context& yield) {
+  auto got = controller.Get(KeyDTO{"some_key"});
+  if (got.has_failure()) {
+    rpc.finish_with_error(grpc::Status(grpc::UNKNOWN, "unknown error"), yield);
+  }
+  auto [value] = got.assume_value();
   GetRPC::Response response;
-  response.set_value("blabla");
+  response.set_value(std::move(value));
   rpc.finish(response, grpc::Status::OK, yield);
 }
 

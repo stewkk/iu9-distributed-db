@@ -17,7 +17,7 @@
 
 #include <api.grpc.pb.h>
 
-#include <stewkk/db/views/add_handlers.hpp>
+#include <stewkk/db/views/register_handlers.hpp>
 
 ABSL_FLAG(uint16_t, port, 50051, "Server port for the db");
 
@@ -39,7 +39,8 @@ void RunServer(uint16_t port) {
     threads.create_thread([&grpc_context]() { grpc_context.run(); });
   }
 
-  stewkk::db::views::AddHandlers(grpc_context, service);
+  stewkk::db::views::HandlersProxy handlers(stewkk::db::logic::controllers::Controller{});
+  stewkk::db::views::RegisterHandlers(handlers, grpc_context, service);
 
   LOG(INFO) << "Server listening on " << server_address;
   grpc_context.run();
