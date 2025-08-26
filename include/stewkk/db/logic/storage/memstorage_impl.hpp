@@ -6,6 +6,8 @@
 #include <boost/unordered/unordered_flat_map.hpp>
 
 #include <stewkk/db/logic/result/result.hpp>
+#include <stewkk/db/logic/storage/collectable_memstorage.hpp>
+#include <stewkk/db/logic/storage/memstorage.hpp>
 #include <stewkk/db/models/storage/kw_pair.hpp>
 
 namespace stewkk::db::logic::storage {
@@ -13,17 +15,19 @@ namespace stewkk::db::logic::storage {
 using models::storage::KwPair;
 using result::Result;
 
-class MemoryStorage {
+class MapStorage : public KwStorage, public CollectableStorage {
 private:
   using Map = boost::concurrent_flat_map<std::string, std::string>;
 
 public:
-  Result<KwPair> Get(std::string key);
-  Result<> Remove(std::string key);
-  void Insert(KwPair data);
-  Result<> Update(KwPair data);
+  virtual Result<KwPair> Get(std::string key) override;
+  virtual Result<> Remove(std::string key) override;
+  virtual void Insert(KwPair data) override;
+  virtual Result<> Update(KwPair data) override;
 
-  Map&& GetUnderlying() &&;
+  virtual std::vector<KwPair> Collect() override;
+
+  Map&& MoveUnderlying();
 
 private:
   Map map_;
@@ -34,7 +38,7 @@ private:
   using Map = boost::unordered::unordered_flat_map<std::string, std::string>;
 
 public:
-  ReadonlyMemoryStorage(MemoryStorage&& storage);
+  ReadonlyMemoryStorage(MapStorage&& storage);
 
   struct Iterator {
     using difference_type = std::ptrdiff_t;

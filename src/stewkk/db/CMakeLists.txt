@@ -1,6 +1,7 @@
 include(FetchGRPC)
 include(FetchBoost)
 include(FetchAsioGrpc)
+include(FetchFolly)
 
 get_filename_component(api_proto "api.proto" ABSOLUTE)
 get_filename_component(api_proto_path "${api_proto}" PATH)

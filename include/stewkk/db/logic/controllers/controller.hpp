@@ -17,6 +17,8 @@ public:
   virtual result::Result<> Update(KwDTO data) override;
   virtual result::Result<> Remove(KeyDTO data) override;
   virtual result::Result<ValueDTO> Get(KeyDTO data) override;
+
+private:
 };
 
 }  // namespace stewkk::db::logic::controllers

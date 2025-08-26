@@ -1,4 +1,4 @@
-#include <stewkk/db/logic/storage/inmemory.hpp>
+#include <stewkk/db/logic/storage/memstorage_impl.hpp>
 
 namespace stewkk::db::logic::storage {
 
@@ -11,7 +11,7 @@ constexpr static std::string_view kNotFound{"key {} not found in storage"};
 
 }  // namespace
 
-Result<KwPair> MemoryStorage::Get(std::string key) {
+Result<KwPair> MapStorage::Get(std::string key) {
   std::string value;
   bool found = map_.visit(key, [&value](const auto& x) { value = x.second; });
   if (!found) {
@@ -20,7 +20,7 @@ Result<KwPair> MemoryStorage::Get(std::string key) {
   return KwPair{.key = std::move(key), .value = std::move(value)};
 }
 
-Result<> MemoryStorage::Remove(std::string key) {
+Result<> MapStorage::Remove(std::string key) {
   bool is_erased = map_.erase(std::move(key));
   if (!is_erased) {
     return Error(kNotFound, key);
@@ -28,11 +28,11 @@ Result<> MemoryStorage::Remove(std::string key) {
   return Ok();
 }
 
-void MemoryStorage::Insert(KwPair data) {
+void MapStorage::Insert(KwPair data) {
   map_.insert_or_assign(std::move(data.key), std::move(data.value));
 }
 
-Result<> MemoryStorage::Update(KwPair data) {
+Result<> MapStorage::Update(KwPair data) {
   bool found = map_.visit(data.key, [&data](auto& x) { x.second = std::move(data.value); });
   if (!found) {
     return Error("trying to update non-existing key {}", std::move(data.key));
@@ -40,10 +40,16 @@ Result<> MemoryStorage::Update(KwPair data) {
   return Ok();
 }
 
-MemoryStorage::Map&& MemoryStorage::GetUnderlying() && { return std::move(map_); }
+MapStorage::Map&& MapStorage::MoveUnderlying() { return std::move(map_); }
 
-ReadonlyMemoryStorage::ReadonlyMemoryStorage(MemoryStorage&& storage)
-    : map_(std::move(storage).GetUnderlying()) {}
+std::vector<KwPair> MapStorage::Collect() {
+  auto readonly = ReadonlyMemoryStorage(std::move(*this));
+  map_ = Map();
+  return std::vector<KwPair>{readonly.begin(), readonly.end()};
+}
+
+ReadonlyMemoryStorage::ReadonlyMemoryStorage(MapStorage&& storage)
+    : map_(std::move(storage).MoveUnderlying()) {}
 
 ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::begin() const {
   return Iterator{map_.cbegin()};

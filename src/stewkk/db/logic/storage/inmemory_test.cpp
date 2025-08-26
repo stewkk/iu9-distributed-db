@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 
 #include <stewkk/db/logic/result/result.hpp>
-#include <stewkk/db/logic/storage/inmemory.hpp>
+#include <stewkk/db/logic/storage/memstorage_impl.hpp>
 
 using ::testing::Eq;
 using ::testing::IsTrue;
@@ -10,7 +10,7 @@ using ::testing::StrEq;
 namespace stewkk::db::logic::storage {
 
 TEST(MemoryStorageTest, Get) {
-  MemoryStorage storage;
+  MapStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
 
@@ -20,7 +20,7 @@ TEST(MemoryStorageTest, Get) {
 }
 
 TEST(MemoryStorageTest, GetNonExisting) {
-  MemoryStorage storage;
+  MapStorage storage;
 
   auto got = storage.Get("abc").error();
 
@@ -28,7 +28,7 @@ TEST(MemoryStorageTest, GetNonExisting) {
 }
 
 TEST(MemoryStorageTest, GetAfterRemove) {
-  MemoryStorage storage;
+  MapStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
   auto _ = storage.Remove("key");
@@ -39,7 +39,7 @@ TEST(MemoryStorageTest, GetAfterRemove) {
 }
 
 TEST(MemoryStorageTest, RemoveNonExisting) {
-  MemoryStorage storage;
+  MapStorage storage;
 
   auto got = storage.Remove("abc").error();
 
@@ -47,7 +47,7 @@ TEST(MemoryStorageTest, RemoveNonExisting) {
 }
 
 TEST(MemoryStorageTest, InsertUpdatesExistingKey) {
-  MemoryStorage storage;
+  MapStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
   data.value = "other";
@@ -59,7 +59,7 @@ TEST(MemoryStorageTest, InsertUpdatesExistingKey) {
 }
 
 TEST(MemoryStorageTest, Update) {
-  MemoryStorage storage;
+  MapStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
   data.value = "other";
@@ -71,7 +71,7 @@ TEST(MemoryStorageTest, Update) {
 }
 
 TEST(MemoryStorageTest, UpdateFailsOnNonExistingKey) {
-  MemoryStorage storage;
+  MapStorage storage;
   KwPair data{.key = "abc", .value = "value"};
 
   auto got = storage.Update(data).error();
