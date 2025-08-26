@@ -1,28 +1,39 @@
 #include <stewkk/db/logic/storage/swappable_memstorage.hpp>
 
+#include <folly/synchronization/Hazptr.h>
+
 namespace stewkk::db::logic::storage {
 
 Result<KwPair> SwappableMemoryStorage::Get(std::string key) {
-  return storage_ptr_.load()->Get(std::move(key));
+  folly::hazptr_holder h = folly::make_hazard_pointer();
+  MapStorage* ptr = h.protect(storage_ptr_);
+  return ptr->Get(std::move(key));
 }
 
 Result<> SwappableMemoryStorage::Remove(std::string key) {
-  return storage_ptr_.load()->Remove(std::move(key));
+  folly::hazptr_holder h = folly::make_hazard_pointer();
+  MapStorage* ptr = h.protect(storage_ptr_);
+  return ptr->Remove(std::move(key));
 }
 
 void SwappableMemoryStorage::Insert(KwPair data) {
-  return storage_ptr_.load()->Insert(std::move(data));
+  folly::hazptr_holder h = folly::make_hazard_pointer();
+  MapStorage* ptr = h.protect(storage_ptr_);
+  return ptr->Insert(std::move(data));
 }
 
 Result<> SwappableMemoryStorage::Update(KwPair data) {
-  return storage_ptr_.load()->Update(std::move(data));
+  folly::hazptr_holder h = folly::make_hazard_pointer();
+  MapStorage* ptr = h.protect(storage_ptr_);
+  return ptr->Update(std::move(data));
 }
 
 std::vector<KwPair> SwappableMemoryStorage::Collect() {
-  auto new_storage = std::make_shared<MapStorage>();
+  auto new_storage = new MapStorage;
   auto current_storage = storage_ptr_.exchange(new_storage);
-  // FIXME: data race here!
-  return current_storage->Collect();
+  auto res = current_storage->Collect();
+  current_storage->retire();
+  return res;
 }
 
 }  // namespace stewkk::db::logic::storage

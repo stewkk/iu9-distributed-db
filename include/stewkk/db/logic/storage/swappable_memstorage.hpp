@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+#include <atomic>
 #include <string>
 
 #include <stewkk/db/logic/result/result.hpp>
@@ -20,7 +20,7 @@ public:
   virtual std::vector<KwPair> Collect() override;
 
 private:
-  std::atomic<std::shared_ptr<MapStorage>> storage_ptr_;
+  std::atomic<MapStorage*> storage_ptr_;
 };
 
 }  // namespace stewkk::db::logic::storage

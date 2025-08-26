@@ -98,6 +98,7 @@ target_link_libraries(libdb
   absl::log
   absl::log_initialize
   asio-grpc::asio-grpc
+  folly_target
   ${_REFLECTION}
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF}

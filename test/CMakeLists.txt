@@ -4,6 +4,7 @@ include(GoogleTest)
 add_executable(unittests)
 target_sources(unittests PRIVATE
   ${PROJECT_SOURCE_DIR}/src/stewkk/db/logic/storage/inmemory_test.cpp
+  ${PROJECT_SOURCE_DIR}/src/stewkk/db/logic/storage/swappable_test.cpp
   ${PROJECT_SOURCE_DIR}/src/stewkk/db/logic/storage/persistent_test.cpp
   ${PROJECT_SOURCE_DIR}/src/stewkk/db/logic/recovery/wal_test.cpp
 )
