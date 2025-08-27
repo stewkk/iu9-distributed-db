@@ -24,6 +24,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.plantuml
     pkgs.systemd
     pkgs.gdb
+    pkgs.libiberty
 
     # keep this line if you use bash
     pkgs.bashInteractive

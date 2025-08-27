@@ -89,6 +89,7 @@ FetchContent_Declare(
     GIT_TAG         v2022.01.24.00
     GIT_PROGRESS   TRUE
     USES_TERMINAL_DOWNLOAD TRUE
+    PATCH_COMMAND git apply ${PROJECT_SOURCE_DIR}/cmake/folly-demangle.patch
 )
 FetchContent_Populate(FOLLY)
 set(folly_include_dir "${folly_SOURCE_DIR}")
@@ -115,9 +116,41 @@ set(folly_compile_options
 target_compile_options(folly_target PUBLIC ${folly_compile_options})
 target_sources(folly_target PRIVATE
     "${folly_src_dir}/synchronization/Hazptr.cpp"
+    "${folly_src_dir}/synchronization/AsymmetricMemoryBarrier.cpp"
+    "${folly_src_dir}/executors/QueuedImmediateExecutor.cpp"
+    "${folly_src_dir}/detail/ThreadLocalDetail.cpp"
+    "${folly_src_dir}/detail/StaticSingletonManager.cpp"
+    "${folly_src_dir}/detail/AtFork.cpp"
+    "${folly_src_dir}/system/ThreadId.cpp"
+    "${folly_src_dir}/SharedMutex.cpp"
+    "${folly_src_dir}/Executor.cpp"
+    "${folly_src_dir}/memory/detail/MallocImpl.cpp"
+    "${folly_src_dir}/concurrency/CacheLocality.cpp"
+    "${folly_src_dir}/detail/Futex.cpp"
+    "${folly_src_dir}/synchronization/ParkingLot.cpp"
+    "${folly_src_dir}/lang/SafeAssert.cpp"
+    "${folly_src_dir}/lang/ToAscii.cpp"
+    "${folly_src_dir}/ExceptionWrapper.cpp"
+    "${folly_src_dir}/ExceptionString.cpp"
+    "${folly_src_dir}/Demangle.cpp"
+    "${folly_src_dir}/lang/Exception.cpp"
+    "${folly_src_dir}/lang/CString.cpp"
 )
+
+find_path(LIBIBERTY_INCLUDE_DIR NAMES libiberty.h PATH_SUFFIXES libiberty)
+message(STATUS ${LIBIBERTY_INCLUDE_DIR})
+
+find_library(LIBIBERTY_LIBRARY NAMES iberty libiberty)
+message(STATUS ${LIBIBERTY_LIBRARY})
+
+set(LIBIBERTY_FOUND TRUE)
+
+target_include_directories(folly_target PUBLIC ${LIBIBERTY_INCLUDE_DIR})
+
 target_link_libraries(folly_target PUBLIC
     glog_target
     double_conversion_target
     Boost::preprocessor
+    ${LIBIBERTY_LIBRARY}
+    fmt::fmt
 )

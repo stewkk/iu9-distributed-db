@@ -24,7 +24,7 @@ ABSL_FLAG(uint16_t, port, 50051, "Server port for the db");
 void RunServer(uint16_t port) {
   auto server_address = std::format("0.0.0.0:{}", port);
   Db::AsyncService service;
-  const auto thread_count = std::thread::hardware_concurrency() - 1;
+  const auto thread_count = std::thread::hardware_concurrency();
 
   grpc::EnableDefaultHealthCheckService(true);
   grpc::reflection::InitProtoReflectionServerBuilderPlugin();
@@ -35,7 +35,7 @@ void RunServer(uint16_t port) {
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
 
   boost::thread_group threads;
-  for (int i = 0; i < thread_count; ++i) {
+  for (int i = 0; i < thread_count - 1; ++i) {
     threads.create_thread([&grpc_context]() { grpc_context.run(); });
   }
 

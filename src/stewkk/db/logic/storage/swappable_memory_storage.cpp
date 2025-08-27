@@ -4,6 +4,13 @@
 
 namespace stewkk::db::logic::storage {
 
+SwappableMemoryStorage::SwappableMemoryStorage() : storage_ptr_(new MapStorage) {}
+
+SwappableMemoryStorage::~SwappableMemoryStorage() {
+  auto ptr = storage_ptr_.exchange(nullptr);
+  ptr->retire();
+}
+
 Result<KwPair> SwappableMemoryStorage::Get(std::string key) {
   folly::hazptr_holder h = folly::make_hazard_pointer();
   MapStorage* ptr = h.protect(storage_ptr_);

@@ -12,6 +12,12 @@ namespace stewkk::db::logic::storage {
 
 class SwappableMemoryStorage : public KwStorage, public CollectableStorage {
 public:
+  SwappableMemoryStorage();
+  ~SwappableMemoryStorage();
+
+  SwappableMemoryStorage(const SwappableMemoryStorage& other) = delete;
+  SwappableMemoryStorage& operator=(const SwappableMemoryStorage& other) = delete;
+
   virtual Result<KwPair> Get(std::string key) override;
   virtual Result<> Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
