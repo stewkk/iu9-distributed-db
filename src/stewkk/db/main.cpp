@@ -13,10 +13,10 @@
 #include <absl/flags/flag.h>
 #include <absl/flags/parse.h>
 #include <absl/log/initialize.h>
-#include <absl/log/log.h>
 
 #include <api.grpc.pb.h>
 
+#include <stewkk/db/logic/storage/swappable_memstorage.hpp>
 #include <stewkk/db/views/register_handlers.hpp>
 
 ABSL_FLAG(uint16_t, port, 50051, "Server port for the db");
@@ -39,7 +39,8 @@ void RunServer(uint16_t port) {
     threads.create_thread([&grpc_context]() { grpc_context.run(); });
   }
 
-  stewkk::db::views::HandlersProxy handlers(stewkk::db::logic::controllers::Controller{});
+  auto storage = stewkk::db::logic::storage::SwappableMemoryStorage();
+  stewkk::db::views::HandlersProxy handlers(stewkk::db::logic::controllers::Controller{storage});
   stewkk::db::views::RegisterHandlers(handlers, grpc_context, service);
 
   LOG(INFO) << "Server listening on " << server_address;

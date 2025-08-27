@@ -69,6 +69,7 @@ add_library(libdb
   logic/controllers/update.cpp
   logic/controllers/remove.cpp
   logic/controllers/get.cpp
+  logic/controllers/controller.cpp
   views/register_handlers.cpp
   views/handlers_proxy.cpp
   views/insert.cpp

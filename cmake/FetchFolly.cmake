@@ -90,6 +90,7 @@ FetchContent_Declare(
     GIT_PROGRESS   TRUE
     USES_TERMINAL_DOWNLOAD TRUE
     PATCH_COMMAND git apply ${PROJECT_SOURCE_DIR}/cmake/folly-demangle.patch
+    UPDATE_DISCONNECTED 1
 )
 FetchContent_Populate(FOLLY)
 set(folly_include_dir "${folly_SOURCE_DIR}")

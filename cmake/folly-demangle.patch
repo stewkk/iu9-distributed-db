@@ -2,7 +2,7 @@ diff --git a/folly/Demangle.cpp b/folly/Demangle.cpp
 index 1af58f20c..e7cfa9996 100644
 --- a/folly/Demangle.cpp
 +++ b/folly/Demangle.cpp
-@@ -16,6 +16,9 @@
+@@ -16,5 +16,8 @@
 
  #include <folly/Demangle.h>
 
@@ -11,3 +11,4 @@ index 1af58f20c..e7cfa9996 100644
 +
  #include <algorithm>
  #include <cstring>
+
