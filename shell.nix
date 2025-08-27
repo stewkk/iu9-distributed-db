@@ -58,6 +58,10 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
       pip install -r requirements.txt
     fi
 
+    if [ -f pytests/requirements.txt ]; then
+      pip install -r pytests/requirements.txt
+    fi
+
     python --version
   '';
 }

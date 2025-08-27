@@ -3,3 +3,5 @@ pytest
 grpcio
 grpcio-tools
 protoletariat
+grpcio-status
+grpcio-health-checking
