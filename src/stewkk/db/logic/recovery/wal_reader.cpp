@@ -30,7 +30,7 @@ Result<std::vector<Operation>> ReadWAL(fs::path path) {
     }
     if (!is_ok) {
       // TODO: maybe just log error and break?
-      return result::Error("failed to parse WAL file: {}", path.string());
+      return result::MakeError("failed to parse WAL file: {}", path.string());
     }
 
     // NOTE: better to move into separate function

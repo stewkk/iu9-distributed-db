@@ -2,15 +2,6 @@
 
 namespace stewkk::db::logic::result {
 
-std::string What(std::exception_ptr ex_ptr) {
-  if (!ex_ptr) {
-    return "nullptr exception";
-  }
-  try {
-    std::rethrow_exception(ex_ptr);
-  } catch (const std::exception& ex) {
-    return ex.what();
-  }
-}
+std::string What(const Error& error) { return error.What(); }
 
 }  // namespace stewkk::db::logic::result

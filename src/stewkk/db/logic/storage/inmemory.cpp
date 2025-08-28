@@ -2,7 +2,7 @@
 
 namespace stewkk::db::logic::storage {
 
-using result::Error;
+using result::MakeError;
 using result::Ok;
 
 namespace {
@@ -15,7 +15,7 @@ Result<KwPair> MapStorage::Get(std::string key) {
   std::string value;
   bool found = map_.visit(key, [&value](const auto& x) { value = x.second; });
   if (!found) {
-    return Error(kNotFound, key);
+    return MakeError(kNotFound, key);
   }
   return KwPair{.key = std::move(key), .value = std::move(value)};
 }
@@ -23,7 +23,7 @@ Result<KwPair> MapStorage::Get(std::string key) {
 Result<> MapStorage::Remove(std::string key) {
   bool is_erased = map_.erase(std::move(key));
   if (!is_erased) {
-    return Error(kNotFound, key);
+    return MakeError(kNotFound, key);
   }
   return Ok();
 }
@@ -35,7 +35,7 @@ void MapStorage::Insert(KwPair data) {
 Result<> MapStorage::Update(KwPair data) {
   bool found = map_.visit(data.key, [&data](auto& x) { x.second = std::move(data.value); });
   if (!found) {
-    return Error("trying to update non-existing key {}", std::move(data.key));
+    return MakeError("trying to update non-existing key {}", std::move(data.key));
   }
   return Ok();
 }

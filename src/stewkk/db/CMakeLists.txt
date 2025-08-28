@@ -65,6 +65,7 @@ add_library(libdb
   logic/recovery/wal_writer.cpp
   logic/recovery/wal_reader.cpp
   logic/result/result.cpp
+  logic/result/error.cpp
   logic/controllers/insert.cpp
   logic/controllers/update.cpp
   logic/controllers/remove.cpp

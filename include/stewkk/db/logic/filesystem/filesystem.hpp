@@ -8,7 +8,7 @@
 
 namespace stewkk::db::logic::filesystem {
 
-using result::Error;
+using result::MakeError;
 using result::Ok;
 using result::Result;
 namespace fs = std::filesystem;
@@ -31,7 +31,7 @@ template <typename T> Result<T> ReadFromFile(type<T>, std::ifstream& f) {
   try {
     f.read(reinterpret_cast<char*>(&res), sizeof(T));
   } catch (const std::exception& ex) {
-    return Error(kFailedToRead, ex.what());
+    return MakeError(kFailedToRead, ex.what());
   }
   return res;
 }
@@ -42,7 +42,7 @@ Result<std::vector<T>> ReadFromFile(type<std::vector<T>>, std::ifstream& f, std:
   try {
     f.read(reinterpret_cast<char*>(res.data()), res.size() * sizeof(T));
   } catch (const std::exception& ex) {
-    return Error(kFailedToRead, ex.what());
+    return MakeError(kFailedToRead, ex.what());
   }
   return res;
 }
@@ -60,7 +60,7 @@ template <typename T> Result<> WriteToFile(std::ofstream& f, const T& data) {
     f.write(reinterpret_cast<const char*>(&data), sizeof(data));
     return Ok();
   } catch (const std::exception& ex) {
-    return Error(kFailedToWrite, ex.what());
+    return MakeError(kFailedToWrite, ex.what());
   }
 }
 
@@ -69,7 +69,7 @@ template <typename T> Result<> WriteToFile(std::ofstream& f, const std::vector<T
     f.write(reinterpret_cast<const char*>(vec.data()), vec.size() * sizeof(T));
     return Ok();
   } catch (const std::exception& ex) {
-    return Error(kFailedToWrite, ex.what());
+    return MakeError(kFailedToWrite, ex.what());
   }
 }
 

@@ -10,7 +10,7 @@
 
 namespace stewkk::db::logic::filesystem {
 
-using result::Error;
+using result::MakeError;
 using result::Result;
 namespace fs = std::filesystem;
 
@@ -30,7 +30,7 @@ Result<std::ofstream> CreateBinaryFile(fs::path path) {
     res.open(path, std::ofstream::out | std::ofstream::binary);
     return res;
   } catch (const std::exception& ex) {
-    return Error("failed to create file at {}: {}", path.string(), ex.what());
+    return MakeError("failed to create file at {}: {}", path.string(), ex.what());
   }
 }
 
@@ -41,14 +41,14 @@ Result<std::ifstream> OpenBinaryFile(fs::path path) {
     res.open(path, std::ifstream::in | std::ifstream::binary);
     return res;
   } catch (const std::exception& ex) {
-    return Error("failed to open file at {}: {}", path.string(), ex.what());
+    return MakeError("failed to open file at {}: {}", path.string(), ex.what());
   }
 }
 
 Result<std::int32_t> OpenBinaryFD(fs::path path) {
   auto fd = open(path.c_str(), O_RDONLY);
   if (fd == -1) {
-    return Error("failed to open file at {}", path.string());
+    return MakeError("failed to open file at {}", path.string());
   }
   return Ok(fd);
 }

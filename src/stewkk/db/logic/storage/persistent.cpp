@@ -7,7 +7,7 @@
 
 namespace stewkk::db::logic::storage {
 
-using result::Error;
+using result::MakeError;
 using result::WrapError;
 
 namespace {
@@ -84,7 +84,7 @@ Result<KwPair> PersistentStorage::Get(std::string_view key) {
                              });
 
   if (it == index_.cend() || key != ReadString(it->key)) {
-    return Error("key {} not found in persistent storage {}", key, path_.string());
+    return MakeError("key {} not found in persistent storage {}", key, path_.string());
   }
 
   return KwPair{

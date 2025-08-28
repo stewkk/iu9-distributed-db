@@ -26,7 +26,7 @@ Result<> WALWriter::WriteEntry(boost::asio::yield_context yield, wal::Entry entr
   boost::asio::post(boost::asio::bind_executor(executor_, yield));
 
   if (!is_ok) {
-    return result::Error("failed to write log entry");
+    return result::MakeError("failed to write log entry");
   }
   return result::Ok();
 }
