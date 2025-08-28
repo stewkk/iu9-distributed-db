@@ -23,7 +23,7 @@ Result<KwPair> MapStorage::Get(std::string key) {
 Result<> MapStorage::Remove(std::string key) {
   bool is_erased = map_.erase(std::move(key));
   if (!is_erased) {
-    return MakeError(kNotFound, key);
+    return MakeError<result::ErrorType::kNotFound>(kNotFound, key);
   }
   return Ok();
 }
