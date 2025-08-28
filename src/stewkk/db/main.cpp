@@ -16,6 +16,7 @@
 
 #include <api.grpc.pb.h>
 
+#include <stewkk/db/logic/recovery/wal_writer_impl.hpp>
 #include <stewkk/db/logic/storage/swappable_memstorage.hpp>
 #include <stewkk/db/views/register_handlers.hpp>
 
@@ -40,7 +41,9 @@ void RunServer(uint16_t port) {
   }
 
   auto storage = stewkk::db::logic::storage::SwappableMemoryStorage();
-  stewkk::db::views::HandlersProxy handlers(stewkk::db::logic::controllers::Controller{storage});
+  auto wal_writer = stewkk::db::logic::recovery::NewWALWriter(grpc_context.get_executor()).value();
+  stewkk::db::views::HandlersProxy handlers(
+      stewkk::db::logic::controllers::Controller{storage, wal_writer});
   stewkk::db::views::RegisterHandlers(handlers, grpc_context, service);
 
   LOG(INFO) << "Server listening on " << server_address;

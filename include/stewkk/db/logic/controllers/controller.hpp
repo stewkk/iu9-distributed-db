@@ -5,6 +5,7 @@
 #include <stewkk/db/logic/controllers/insert.hpp>
 #include <stewkk/db/logic/controllers/remove.hpp>
 #include <stewkk/db/logic/controllers/update.hpp>
+#include <stewkk/db/logic/recovery/wal_writer.hpp>
 #include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/logic/storage/memstorage.hpp>
 
@@ -16,9 +17,9 @@ class Controller : public GetController,
                    public UpdateController,
                    public ClearController {
 public:
-  explicit Controller(storage::KwStorage& storage);
+  Controller(storage::KwStorage& storage, recovery::WALWriter& wal_writer);
 
-  virtual result::Result<> Insert(KwDTO data) override;
+  virtual result::Result<> Insert(const boost::asio::yield_context& yield, KwDTO data) override;
   virtual result::Result<> Update(KwDTO data) override;
   virtual result::Result<> Remove(KeyDTO data) override;
   virtual result::Result<ValueDTO> Get(KeyDTO data) override;
@@ -26,6 +27,7 @@ public:
 
 private:
   storage::KwStorage& storage_;
+  recovery::WALWriter& wal_writer_;
 };
 
 }  // namespace stewkk::db::logic::controllers

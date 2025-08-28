@@ -19,7 +19,7 @@ WALWriterImpl::WALWriterImpl(boost::asio::executor executor, fs::path path, std:
       strand_(boost::asio::make_strand(executor)),
       executor_(std::move(executor)) {}
 
-Result<> WALWriterImpl::WriteEntry(boost::asio::yield_context yield, wal::Entry entry) {
+Result<> WALWriterImpl::WriteEntry(const boost::asio::yield_context& yield, wal::Entry entry) {
   boost::asio::post(boost::asio::bind_executor(strand_, yield));
   bool is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
   f_.flush();
@@ -31,7 +31,7 @@ Result<> WALWriterImpl::WriteEntry(boost::asio::yield_context yield, wal::Entry 
   return result::Ok();
 }
 
-Result<> WALWriterImpl::Remove(boost::asio::yield_context yield, std::string key) {
+Result<> WALWriterImpl::Remove(const boost::asio::yield_context& yield, std::string key) {
   wal::Entry entry;
   auto* remove_op = entry.mutable_remove();
   remove_op->set_key(std::move(key));
@@ -39,16 +39,16 @@ Result<> WALWriterImpl::Remove(boost::asio::yield_context yield, std::string key
   return WriteEntry(std::move(yield), std::move(entry));
 }
 
-Result<> WALWriterImpl::Insert(boost::asio::yield_context yield, KwPair data) {
+Result<> WALWriterImpl::Insert(const boost::asio::yield_context& yield, KwPair data) {
   wal::Entry entry;
   auto* insert_op = entry.mutable_insert();
   insert_op->set_key(std::move(data).key);
   insert_op->set_value(std::move(data).value);
 
-  return WriteEntry(std::move(yield), std::move(entry));
+  return WriteEntry(yield, std::move(entry));
 }
 
-Result<> WALWriterImpl::Update(boost::asio::yield_context yield, KwPair data) {
+Result<> WALWriterImpl::Update(const boost::asio::yield_context& yield, KwPair data) {
   wal::Entry entry;
   auto* update_op = entry.mutable_update();
   update_op->set_key(std::move(data).key);

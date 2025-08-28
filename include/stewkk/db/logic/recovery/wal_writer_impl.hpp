@@ -25,14 +25,14 @@ class WALWriterImpl : public WALWriter {
 public:
   WALWriterImpl(boost::asio::executor context, fs::path path, std::ofstream&& stream);
 
-  virtual Result<> Remove(boost::asio::yield_context yield, std::string key) override;
-  virtual Result<> Insert(boost::asio::yield_context yield, KwPair data) override;
-  virtual Result<> Update(boost::asio::yield_context yield, KwPair data) override;
+  virtual Result<> Remove(const boost::asio::yield_context& yield, std::string key) override;
+  virtual Result<> Insert(const boost::asio::yield_context& yield, KwPair data) override;
+  virtual Result<> Update(const boost::asio::yield_context& yield, KwPair data) override;
 
   fs::path GetPath() const;
 
 private:
-  Result<> WriteEntry(boost::asio::yield_context yield, wal::Entry entry);
+  Result<> WriteEntry(const boost::asio::yield_context& yield, wal::Entry entry);
 
 private:
   fs::path path_;
