@@ -1,5 +1,6 @@
 #include <stewkk/db/views/handlers_proxy.hpp>
 
+#include <stewkk/db/views/clear.hpp>
 #include <stewkk/db/views/get.hpp>
 #include <stewkk/db/views/insert.hpp>
 #include <stewkk/db/views/remove.hpp>
@@ -28,6 +29,11 @@ void HandlersProxy::GetHandler(GetRPC& rpc, GetRPC::Request& request,
 void HandlersProxy::RemoveHandler(RemoveRPC& rpc, RemoveRPC::Request& request,
                                   const boost::asio::yield_context& yield) {
   ::stewkk::db::views::RemoveHandler(controller_, rpc, request, yield);
+}
+
+void HandlersProxy::ClearHandler(ClearRPC& rpc, ClearRPC::Request& request,
+                                 const boost::asio::yield_context& yield) {
+  ::stewkk::db::views::ClearHandler(controller_, rpc, request, yield);
 }
 
 }  // namespace stewkk::db::views

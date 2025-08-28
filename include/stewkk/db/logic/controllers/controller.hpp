@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stewkk/db/logic/controllers/clear.hpp>
 #include <stewkk/db/logic/controllers/get.hpp>
 #include <stewkk/db/logic/controllers/insert.hpp>
 #include <stewkk/db/logic/controllers/remove.hpp>
@@ -12,7 +13,8 @@ namespace stewkk::db::logic::controllers {
 class Controller : public GetController,
                    public InsertController,
                    public RemoveController,
-                   public UpdateController {
+                   public UpdateController,
+                   public ClearController {
 public:
   explicit Controller(storage::KwStorage& storage);
 
@@ -20,6 +22,7 @@ public:
   virtual result::Result<> Update(KwDTO data) override;
   virtual result::Result<> Remove(KeyDTO data) override;
   virtual result::Result<ValueDTO> Get(KeyDTO data) override;
+  virtual result::Result<> Clear() override;
 
 private:
   storage::KwStorage& storage_;

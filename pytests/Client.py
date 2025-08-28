@@ -50,6 +50,13 @@ class Client:
         except grpc.RpcError as rpc_error:
             return (rpc_error.code(), rpc_error.details())
 
+    def Clear(self):
+        try:
+            response = self.stub.Clear(api_pb2.EmptyRequest())
+            return None
+        except grpc.RpcError as rpc_error:
+            return (rpc_error.code(), rpc_error.details())
+
     async def Healthcheck(self, session=None, process=None):
         request = health_pb2.HealthCheckRequest()
         resp = None

@@ -18,6 +18,8 @@ public:
   void GetHandler(GetRPC& rpc, GetRPC::Request& request, const boost::asio::yield_context& yield);
   void RemoveHandler(RemoveRPC& rpc, RemoveRPC::Request& request,
                      const boost::asio::yield_context& yield);
+  void ClearHandler(ClearRPC& rpc, ClearRPC::Request& request,
+                    const boost::asio::yield_context& yield);
 
 private:
   logic::controllers::Controller controller_;

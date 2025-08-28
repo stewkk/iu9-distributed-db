@@ -67,3 +67,9 @@ async def app_service_scope(
         health_check=Client.Client("localhost", f'{pytestconfig.option.app_service_port}').Healthcheck,
     ) as scope:
         yield scope
+
+
+@pytest.fixture(autouse=True)
+def clear_db(app_client):
+    app_client.Clear()
+    yield

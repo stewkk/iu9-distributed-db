@@ -21,6 +21,12 @@ class KeyRequest(_message.Message):
     def __init__(self, key: _Optional[str]=...) -> None:
         ...
 
+class EmptyRequest(_message.Message):
+    __slots__ = ()
+
+    def __init__(self) -> None:
+        ...
+
 class EmptyReply(_message.Message):
     __slots__ = ()
 

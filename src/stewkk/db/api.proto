@@ -3,6 +3,7 @@ service Db {
   rpc Update (KeyValueRequest) returns (EmptyReply) {}
   rpc Remove (KeyRequest)      returns (EmptyReply) {}
   rpc Get    (KeyRequest)      returns (GetReply)   {}
+  rpc Clear  (EmptyRequest)    returns (EmptyReply) {}
 }
 
 message KeyValueRequest {
@@ -14,8 +15,9 @@ message KeyRequest {
   optional string key = 1;
 }
 
-message EmptyReply {
-}
+message EmptyRequest {}
+
+message EmptyReply {}
 
 message GetReply {
   optional string value = 1;

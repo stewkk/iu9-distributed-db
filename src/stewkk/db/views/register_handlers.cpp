@@ -22,6 +22,9 @@ void RegisterHandlers(HandlersProxy& handlers, agrpc::GrpcContext& grpc_context,
   agrpc::register_yield_rpc_handler<GetRPC>(
       grpc_context, service, std::bind(&HandlersProxy::GetHandler, handlers, _1, _2, _3),
       RethrowFirstArg{});
+  agrpc::register_yield_rpc_handler<ClearRPC>(
+      grpc_context, service, std::bind(&HandlersProxy::ClearHandler, handlers, _1, _2, _3),
+      RethrowFirstArg{});
 }
 
 }  // namespace stewkk::db::views

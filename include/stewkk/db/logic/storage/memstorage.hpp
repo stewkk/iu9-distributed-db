@@ -16,6 +16,7 @@ public:
   virtual Result<> Remove(std::string key) = 0;
   virtual void Insert(KwPair data) = 0;
   virtual Result<> Update(KwPair data) = 0;
+  virtual void Clear() = 0;
 
   virtual ~KwStorage() = default;
 };

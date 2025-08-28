@@ -69,6 +69,7 @@ add_library(libdb
   logic/controllers/update.cpp
   logic/controllers/remove.cpp
   logic/controllers/get.cpp
+  logic/controllers/clear.cpp
   logic/controllers/controller.cpp
   views/register_handlers.cpp
   views/handlers_proxy.cpp
@@ -76,6 +77,7 @@ add_library(libdb
   views/update.cpp
   views/remove.cpp
   views/get.cpp
+  views/clear.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
 target_compile_features(libdb PUBLIC cxx_std_20)

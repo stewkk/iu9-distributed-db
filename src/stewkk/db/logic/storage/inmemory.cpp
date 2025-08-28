@@ -40,6 +40,8 @@ Result<> MapStorage::Update(KwPair data) {
   return Ok();
 }
 
+void MapStorage::Clear() { map_.clear(); }
+
 MapStorage::Map&& MapStorage::MoveUnderlying() { return std::move(map_); }
 
 std::vector<KwPair> MapStorage::Collect() {

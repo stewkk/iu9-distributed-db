@@ -27,6 +27,7 @@ public:
   virtual Result<> Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
   virtual Result<> Update(KwPair data) override;
+  virtual void Clear() override;
 
   virtual std::vector<KwPair> Collect() override;
 

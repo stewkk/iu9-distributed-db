@@ -35,6 +35,12 @@ Result<> SwappableMemoryStorage::Update(KwPair data) {
   return ptr->Update(std::move(data));
 }
 
+void SwappableMemoryStorage::Clear() {
+  folly::hazptr_holder h = folly::make_hazard_pointer();
+  MapStorage* ptr = h.protect(storage_ptr_);
+  ptr->Clear();
+}
+
 std::vector<KwPair> SwappableMemoryStorage::Collect() {
   auto new_storage = new MapStorage;
   auto current_storage = storage_ptr_.exchange(new_storage);
