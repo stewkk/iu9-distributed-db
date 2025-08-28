@@ -15,7 +15,7 @@ Result<KwPair> MapStorage::Get(std::string key) {
   std::string value;
   bool found = map_.visit(key, [&value](const auto& x) { value = x.second; });
   if (!found) {
-    return MakeError(kNotFound, key);
+    return MakeError<result::ErrorType::kNotFound>(kNotFound, key);
   }
   return KwPair{.key = std::move(key), .value = std::move(value)};
 }
