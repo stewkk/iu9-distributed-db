@@ -4,7 +4,7 @@
 #include <boost/asio/thread_pool.hpp>
 
 #include <stewkk/db/logic/recovery/wal_reader.hpp>
-#include <stewkk/db/logic/recovery/wal_writer.hpp>
+#include <stewkk/db/logic/recovery/wal_writer_impl.hpp>
 #include <stewkk/db/models/storage/kw_pair.hpp>
 
 using ::testing::Eq;

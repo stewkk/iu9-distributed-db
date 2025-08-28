@@ -1,4 +1,4 @@
-#include <stewkk/db/logic/recovery/wal_writer.hpp>
+#include <stewkk/db/logic/recovery/wal_writer_impl.hpp>
 
 #include <absl/log/log.h>
 #include <google/protobuf/util/delimited_message_util.h>
@@ -13,13 +13,13 @@ static constexpr std::string_view kFailedToCreate = "failed to create WAL";
 
 }  // namespace
 
-WALWriter::WALWriter(boost::asio::executor executor, fs::path path, std::ofstream&& stream)
+WALWriterImpl::WALWriterImpl(boost::asio::executor executor, fs::path path, std::ofstream&& stream)
     : path_(std::move(path)),
       f_(std::move(stream)),
       strand_(boost::asio::make_strand(executor)),
       executor_(std::move(executor)) {}
 
-Result<> WALWriter::WriteEntry(boost::asio::yield_context yield, wal::Entry entry) {
+Result<> WALWriterImpl::WriteEntry(boost::asio::yield_context yield, wal::Entry entry) {
   boost::asio::post(boost::asio::bind_executor(strand_, yield));
   bool is_ok = google::protobuf::util::SerializeDelimitedToOstream(entry, &f_);
   f_.flush();
@@ -31,7 +31,7 @@ Result<> WALWriter::WriteEntry(boost::asio::yield_context yield, wal::Entry entr
   return result::Ok();
 }
 
-Result<> WALWriter::Remove(boost::asio::yield_context yield, std::string key) {
+Result<> WALWriterImpl::Remove(boost::asio::yield_context yield, std::string key) {
   wal::Entry entry;
   auto* remove_op = entry.mutable_remove();
   remove_op->set_key(std::move(key));
@@ -39,7 +39,7 @@ Result<> WALWriter::Remove(boost::asio::yield_context yield, std::string key) {
   return WriteEntry(std::move(yield), std::move(entry));
 }
 
-Result<> WALWriter::Insert(boost::asio::yield_context yield, KwPair data) {
+Result<> WALWriterImpl::Insert(boost::asio::yield_context yield, KwPair data) {
   wal::Entry entry;
   auto* insert_op = entry.mutable_insert();
   insert_op->set_key(std::move(data).key);
@@ -48,7 +48,7 @@ Result<> WALWriter::Insert(boost::asio::yield_context yield, KwPair data) {
   return WriteEntry(std::move(yield), std::move(entry));
 }
 
-Result<> WALWriter::Update(boost::asio::yield_context yield, KwPair data) {
+Result<> WALWriterImpl::Update(boost::asio::yield_context yield, KwPair data) {
   wal::Entry entry;
   auto* update_op = entry.mutable_update();
   update_op->set_key(std::move(data).key);
@@ -57,7 +57,7 @@ Result<> WALWriter::Update(boost::asio::yield_context yield, KwPair data) {
   return WriteEntry(std::move(yield), std::move(entry));
 }
 
-Result<WALWriter> NewWALWriter(boost::asio::executor executor) {
+Result<WALWriterImpl> NewWALWriter(boost::asio::executor executor) {
   auto extension = "wal";
   auto path = filesystem::GetPath(extension);
   LOG(INFO) << std::format("creating new WAL at {}", path.string());
@@ -67,9 +67,9 @@ Result<WALWriter> NewWALWriter(boost::asio::executor executor) {
   }
   auto f = std::move(f_opt).assume_value();
 
-  return WALWriter(std::move(executor), std::move(path), std::move(f));
+  return WALWriterImpl(std::move(executor), std::move(path), std::move(f));
 }
 
-fs::path WALWriter::GetPath() const { return path_; }
+fs::path WALWriterImpl::GetPath() const { return path_; }
 
 }  // namespace stewkk::db::logic::recovery
