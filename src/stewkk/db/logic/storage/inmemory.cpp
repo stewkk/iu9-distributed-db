@@ -35,7 +35,8 @@ void MapStorage::Insert(KwPair data) {
 Result<> MapStorage::Update(KwPair data) {
   bool found = map_.visit(data.key, [&data](auto& x) { x.second = std::move(data.value); });
   if (!found) {
-    return MakeError("trying to update non-existing key {}", std::move(data.key));
+    return MakeError<result::ErrorType::kNotFound>("trying to update non-existing key {}",
+                                                   std::move(data.key));
   }
   return Ok();
 }
