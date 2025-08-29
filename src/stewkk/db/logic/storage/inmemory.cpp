@@ -11,6 +11,8 @@ constexpr static std::string_view kNotFound{"key {} not found in storage"};
 
 }  // namespace
 
+MapStorage::MapStorage(Map&& other) : map_(std::move(other)) {}
+
 Result<KwPair> MapStorage::Get(std::string key) {
   std::string value;
   bool found = map_.visit(key, [&value](const auto& x) { value = x.second; });

@@ -23,6 +23,9 @@ private:
   using Map = boost::concurrent_flat_map<std::string, std::string>;
 
 public:
+  MapStorage() = default;
+  explicit MapStorage(Map&& other);
+
   virtual Result<KwPair> Get(std::string key) override;
   virtual Result<> Remove(std::string key) override;
   virtual void Insert(KwPair data) override;

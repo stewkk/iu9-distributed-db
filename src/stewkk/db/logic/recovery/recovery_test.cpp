@@ -42,8 +42,6 @@ TEST(RecoveryTest, MemstorageInitialization) {
   });
   pool.join();
   writer.Swap().value();
-
-  auto files = SearchWALFiles().value();
 }
 
 }  // namespace stewkk::db::logic::recovery
