@@ -10,7 +10,7 @@
 
 namespace stewkk::db::logic::recovery {
 
-Result<std::vector<Operation>> ReadWAL(fs::path path) {
+Result<std::pair<std::vector<Operation>, int64_t>> ReadWAL(fs::path path) {
   LOG(INFO) << std::format("loading WAL file: {}", path.string());
   auto f_opt = filesystem::OpenBinaryFD(path);
   if (f_opt.has_failure()) {
@@ -21,7 +21,9 @@ Result<std::vector<Operation>> ReadWAL(fs::path path) {
   google::protobuf::io::FileInputStream stream(f);
   std::vector<Operation> result;
 
+  int64_t last_valid = 0;
   for (;;) {
+    last_valid = stream.ByteCount();
     wal::Entry entry;
     bool is_eof = false;
     bool is_ok = google::protobuf::util::ParseDelimitedFromZeroCopyStream(&entry, &stream, &is_eof);
@@ -29,8 +31,8 @@ Result<std::vector<Operation>> ReadWAL(fs::path path) {
       break;
     }
     if (!is_ok) {
-      // TODO: maybe just log error and break?
-      return result::MakeError("failed to parse WAL file: {}", path.string());
+      LOG(ERROR) << std::format("found bad entry in WAL file {} at {}", path.string(), last_valid);
+      return result::Ok(std::make_pair(std::move(result), last_valid));
     }
 
     // NOTE: better to move into separate function
@@ -55,7 +57,7 @@ Result<std::vector<Operation>> ReadWAL(fs::path path) {
     }
   }
 
-  return result::Ok(std::move(result));
+  return result::Ok(std::make_pair(std::move(result), last_valid));
 }
 
 std::string ToString(OperationType type) {
@@ -67,6 +69,22 @@ std::string ToString(OperationType type) {
     case OperationType::kRemove:
       return "remove";
   }
+}
+
+Result<std::vector<fs::path>> SearchWALFiles() {
+  std::vector<fs::path> result;
+  result.reserve(2);
+  auto dir = filesystem::GetDataDir();
+  try {
+    for (const auto& entry : std::filesystem::directory_iterator{dir}) {
+      if (entry.path().extension() == ".wal") {
+        result.push_back(entry.path());
+      }
+    }
+  } catch (const std::exception& ex) {
+    return result::MakeError("failed to search for .wal files: {}", ex.what());
+  }
+  return result;
 }
 
 }  // namespace stewkk::db::logic::recovery

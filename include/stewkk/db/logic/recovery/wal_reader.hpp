@@ -21,6 +21,8 @@ struct Operation {
   bool operator<=>(const Operation& other) const = default;
 };
 
-Result<std::vector<Operation>> ReadWAL(fs::path path);
+Result<std::pair<std::vector<Operation>, int64_t>> ReadWAL(fs::path path);
+
+Result<std::vector<fs::path>> SearchWALFiles();
 
 }  // namespace stewkk::db::logic::recovery

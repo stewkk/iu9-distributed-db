@@ -18,6 +18,8 @@ static constexpr std::string_view kFailedToWrite = "failed to write file: {}";
 
 fs::path GetPath(std::string_view extension);
 
+fs::path GetDataDir();
+
 Result<std::ofstream> CreateBinaryFile(fs::path path);
 
 Result<std::ifstream> OpenBinaryFile(fs::path path);

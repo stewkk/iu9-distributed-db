@@ -6,13 +6,14 @@ namespace stewkk::db::logic::recovery {
 
 SwappableWalWriterImpl::SwappableWalWriterImpl(WALWriterImpl* writer,
                                                boost::asio::executor executor)
-    : writer_(writer), executor_(executor) {}
+    : writer_(writer), executor_(std::move(executor)) {}
 
 SwappableWalWriterImpl::SwappableWalWriterImpl(SwappableWalWriterImpl&& other)
-    : writer_(other.writer_.exchange(nullptr)) {}
+    : writer_(other.writer_.exchange(nullptr)), executor_(std::move(other.executor_)) {}
 
 SwappableWalWriterImpl& SwappableWalWriterImpl::operator=(SwappableWalWriterImpl&& other) {
   writer_ = other.writer_.exchange(nullptr);
+  executor_ = std::move(other.executor_);
   return *this;
 }
 

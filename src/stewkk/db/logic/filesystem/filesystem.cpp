@@ -58,4 +58,6 @@ fs::path GetPath(std::string_view extension) {
                      boost::uuids::to_string(boost::uuids::random_generator()()), extension);
 }
 
+fs::path GetDataDir() { return kDir; }
+
 }  // namespace stewkk::db::logic::filesystem

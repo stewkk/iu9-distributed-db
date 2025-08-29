@@ -2,6 +2,8 @@
 
 import pathlib
 import sys
+import shutil
+import os
 
 import pytest
 
@@ -11,7 +13,7 @@ pytest_plugins = ['testsuite.pytest_plugin']
 
 
 def pytest_addoption(parser):
-    group = parser.getgroup('app service')
+    group = parser.getgroup('db-service')
     group.addoption(
         '--app-service-port',
         help='Bind app service to this port (default is %(default)s)',
@@ -72,4 +74,6 @@ async def app_service_scope(
 @pytest.fixture(autouse=True)
 def clear_db(app_client):
     app_client.Clear()
+    shutil.rmtree('/tmp/iu9-distributed-db')
+    os.mkdir('/tmp/iu9-distributed-db')
     yield

@@ -25,7 +25,7 @@ TEST(WALTest, WriteAndReadLogs) {
     path = writer.GetPath();
   }
 
-  auto got = ReadWAL(path).value();
+  auto got = ReadWAL(path).value().first;
 
   ASSERT_THAT(got, Eq(std::vector{
                        Operation{OperationType::kRemove, "blabla", std::nullopt},
@@ -54,7 +54,7 @@ TEST(WALTest, Concurrent) {
     pool.join();
   }
 
-  auto got = ReadWAL(path).value();
+  auto got = ReadWAL(path).value().first;
 
   for (auto type : {OperationType::kInsert, OperationType::kRemove, OperationType::kUpdate}) {
     auto count = std::count_if(got.begin(), got.end(),
