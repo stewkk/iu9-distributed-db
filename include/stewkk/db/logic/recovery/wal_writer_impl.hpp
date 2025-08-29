@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fstream>
 
+#include <folly/synchronization/HazptrObj.h>
 #include <boost/asio/executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/spawn.hpp>
@@ -21,7 +22,7 @@ using models::storage::KwPair;
 using result::Result;
 namespace fs = std::filesystem;
 
-class WALWriterImpl : public WALWriter {
+class WALWriterImpl : public WALWriter, public folly::hazptr_obj_base<WALWriterImpl> {
 public:
   WALWriterImpl(boost::asio::executor context, fs::path path, std::ofstream&& stream);
 
