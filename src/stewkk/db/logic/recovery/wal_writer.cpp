@@ -48,15 +48,6 @@ Result<> WALWriterImpl::Insert(const boost::asio::yield_context& yield, KwPair d
   return WriteEntry(yield, std::move(entry));
 }
 
-Result<> WALWriterImpl::Update(const boost::asio::yield_context& yield, KwPair data) {
-  wal::Entry entry;
-  auto* update_op = entry.mutable_update();
-  update_op->set_key(std::move(data).key);
-  update_op->set_value(std::move(data).value);
-
-  return WriteEntry(std::move(yield), std::move(entry));
-}
-
 Result<WALWriterImpl> NewWALWriter(boost::asio::executor executor) {
   auto extension = "wal";
   auto path = filesystem::GetPath(extension);

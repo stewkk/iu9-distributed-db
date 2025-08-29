@@ -46,12 +46,6 @@ Result<> SwappableWalWriterImpl::Insert(const boost::asio::yield_context& yield,
   return ptr->Insert(yield, std::move(data));
 }
 
-Result<> SwappableWalWriterImpl::Update(const boost::asio::yield_context& yield, KwPair data) {
-  folly::hazptr_holder h = folly::make_hazard_pointer();
-  WALWriterImpl* ptr = h.protect(writer_);
-  return ptr->Update(yield, std::move(data));
-}
-
 Result<RemoveWalCallback> SwappableWalWriterImpl::Swap() {
   auto got = NewWALWriter(executor_);
   if (got.has_failure()) {

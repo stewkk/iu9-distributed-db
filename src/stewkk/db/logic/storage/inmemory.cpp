@@ -21,24 +21,12 @@ Result<KwPair> MapStorage::Get(std::string key) {
 }
 
 Result<> MapStorage::Remove(std::string key) {
-  bool is_erased = map_.erase(std::move(key));
-  if (!is_erased) {
-    return MakeError<result::ErrorType::kNotFound>(kNotFound, key);
-  }
+  map_.erase(std::move(key));
   return Ok();
 }
 
 void MapStorage::Insert(KwPair data) {
   map_.insert_or_assign(std::move(data.key), std::move(data.value));
-}
-
-Result<> MapStorage::Update(KwPair data) {
-  bool found = map_.visit(data.key, [&data](auto& x) { x.second = std::move(data.value); });
-  if (!found) {
-    return MakeError<result::ErrorType::kNotFound>("trying to update non-existing key {}",
-                                                   std::move(data.key));
-  }
-  return Ok();
 }
 
 void MapStorage::Clear() { map_.clear(); }

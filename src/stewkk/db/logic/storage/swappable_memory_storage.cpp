@@ -29,12 +29,6 @@ void SwappableMemoryStorage::Insert(KwPair data) {
   return ptr->Insert(std::move(data));
 }
 
-Result<> SwappableMemoryStorage::Update(KwPair data) {
-  folly::hazptr_holder h = folly::make_hazard_pointer();
-  MapStorage* ptr = h.protect(storage_ptr_);
-  return ptr->Update(std::move(data));
-}
-
 void SwappableMemoryStorage::Clear() {
   folly::hazptr_holder h = folly::make_hazard_pointer();
   MapStorage* ptr = h.protect(storage_ptr_);

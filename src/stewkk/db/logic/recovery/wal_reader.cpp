@@ -42,12 +42,6 @@ Result<std::pair<std::vector<Operation>, int64_t>> ReadWAL(fs::path path) {
           entry.insert().key(),
           entry.insert().value(),
       });
-    } else if (entry.has_update()) {
-      result.push_back(Operation{
-          OperationType::kUpdate,
-          entry.update().key(),
-          entry.update().value(),
-      });
     } else if (entry.has_remove()) {
       result.push_back(Operation{
           OperationType::kRemove,
@@ -64,8 +58,6 @@ std::string ToString(OperationType type) {
   switch (type) {
     case OperationType::kInsert:
       return "insert";
-    case OperationType::kUpdate:
-      return "update";
     case OperationType::kRemove:
       return "remove";
   }

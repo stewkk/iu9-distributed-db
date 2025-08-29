@@ -11,8 +11,6 @@ class HandlersProxy {
 public:
   explicit HandlersProxy(logic::controllers::Controller controller);
 
-  void UpdateHandler(UpdateRPC& rpc, UpdateRPC::Request& request,
-                     const boost::asio::yield_context& yield);
   void InsertHandler(InsertRPC& rpc, InsertRPC::Request& request,
                      const boost::asio::yield_context& yield);
   void GetHandler(GetRPC& rpc, GetRPC::Request& request, const boost::asio::yield_context& yield);

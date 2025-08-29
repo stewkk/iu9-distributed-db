@@ -4,17 +4,11 @@
 #include <stewkk/db/views/get.hpp>
 #include <stewkk/db/views/insert.hpp>
 #include <stewkk/db/views/remove.hpp>
-#include <stewkk/db/views/update.hpp>
 
 namespace stewkk::db::views {
 
 HandlersProxy::HandlersProxy(logic::controllers::Controller controller)
     : controller_(std::move(controller)) {}
-
-void HandlersProxy::UpdateHandler(UpdateRPC& rpc, UpdateRPC::Request& request,
-                                  const boost::asio::yield_context& yield) {
-  ::stewkk::db::views::UpdateHandler(controller_, rpc, request, yield);
-}
 
 void HandlersProxy::InsertHandler(InsertRPC& rpc, InsertRPC::Request& request,
                                   const boost::asio::yield_context& yield) {

@@ -19,7 +19,6 @@ TEST(WALTest, WriteAndReadLogs) {
     boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
       writer.Remove(yield, "blabla").value();
       writer.Insert(yield, KwPair{"a", "b"}).value();
-      writer.Update(yield, KwPair{"c", "d"}).value();
     });
     pool.join();
     path = writer.GetPath();
@@ -30,7 +29,6 @@ TEST(WALTest, WriteAndReadLogs) {
   ASSERT_THAT(got, Eq(std::vector{
                        Operation{OperationType::kRemove, "blabla", std::nullopt},
                        Operation{OperationType::kInsert, "a", "b"},
-                       Operation{OperationType::kUpdate, "c", "d"},
                    }));
 }
 
@@ -47,7 +45,6 @@ TEST(WALTest, Concurrent) {
       boost::asio::spawn(pool, [&writer](boost::asio::yield_context yield) {
         writer.Remove(yield, "blabla").value();
         writer.Insert(yield, KwPair{"a", "b"}).value();
-        writer.Update(yield, KwPair{"c", "d"}).value();
       });
     }
 
@@ -56,7 +53,7 @@ TEST(WALTest, Concurrent) {
 
   auto got = ReadWAL(path).value().first;
 
-  for (auto type : {OperationType::kInsert, OperationType::kRemove, OperationType::kUpdate}) {
+  for (auto type : {OperationType::kInsert, OperationType::kRemove}) {
     auto count = std::count_if(got.begin(), got.end(),
                                [&type](const auto& el) { return el.type == type; });
     ASSERT_THAT(count, Eq(20));

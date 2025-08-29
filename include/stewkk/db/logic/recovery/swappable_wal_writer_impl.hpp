@@ -18,7 +18,6 @@ public:
 
   virtual Result<> Remove(const boost::asio::yield_context& yield, std::string key) override;
   virtual Result<> Insert(const boost::asio::yield_context& yield, KwPair data) override;
-  virtual Result<> Update(const boost::asio::yield_context& yield, KwPair data) override;
 
   virtual Result<RemoveWalCallback> Swap() override;
 

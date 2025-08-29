@@ -9,7 +9,7 @@ namespace stewkk::db::logic::recovery {
 using result::Result;
 namespace fs = std::filesystem;
 
-enum class OperationType { kInsert, kUpdate, kRemove };
+enum class OperationType { kInsert, kRemove };
 
 std::string ToString(OperationType type);
 
