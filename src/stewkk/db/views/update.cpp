@@ -4,7 +4,7 @@ namespace stewkk::db::views {
 
 void UpdateHandler(UpdateController& controller, UpdateRPC& rpc, UpdateRPC::Request& request,
                    const boost::asio::yield_context& yield) {
-  auto got = controller.Update(logic::controllers::KwDTO{request.key(), request.value()});
+  auto got = controller.Update(yield, logic::controllers::KwDTO{request.key(), request.value()});
   if (got.has_failure()) {
     auto& error = got.assume_error();
     if (error.Wraps(logic::result::ErrorType::kNotFound)) {

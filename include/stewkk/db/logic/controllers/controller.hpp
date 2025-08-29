@@ -20,8 +20,8 @@ public:
   Controller(storage::KwStorage& storage, recovery::WALWriter& wal_writer);
 
   virtual result::Result<> Insert(const boost::asio::yield_context& yield, KwDTO data) override;
-  virtual result::Result<> Update(KwDTO data) override;
-  virtual result::Result<> Remove(KeyDTO data) override;
+  virtual result::Result<> Update(const boost::asio::yield_context& yield, KwDTO data) override;
+  virtual result::Result<> Remove(const boost::asio::yield_context& yield, KeyDTO data) override;
   virtual result::Result<ValueDTO> Get(KeyDTO data) override;
   virtual result::Result<> Clear() override;
 

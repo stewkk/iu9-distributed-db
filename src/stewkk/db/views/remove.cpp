@@ -6,7 +6,7 @@ using logic::controllers::KeyDTO;
 
 void RemoveHandler(RemoveController& controller, RemoveRPC& rpc, RemoveRPC::Request& request,
                    const boost::asio::yield_context& yield) {
-  auto got = controller.Remove(KeyDTO{request.key()});
+  auto got = controller.Remove(yield, KeyDTO{request.key()});
   if (got.has_failure()) {
     auto& error = got.assume_error();
     if (error.Wraps(logic::result::ErrorType::kNotFound)) {
