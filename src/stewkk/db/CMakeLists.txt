@@ -57,9 +57,29 @@ target_link_libraries(wal_grpc_proto
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF})
 
+get_filename_component(persistent_proto "persistent.proto" ABSOLUTE)
+get_filename_component(persistent_proto_path "${persistent_proto}" PATH)
+set(persistent_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/persistent.pb.cc")
+set(persistent_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/persistent.pb.h")
+add_custom_command(
+      OUTPUT "${persistent_proto_srcs}" "${persistent_proto_hdrs}"
+      COMMAND ${_PROTOBUF_PROTOC}
+      ARGS --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+        -I "${persistent_proto_path}"
+        "${persistent_proto}"
+      DEPENDS "${persistent_proto}")
+add_library(persistent_proto
+  ${persistent_proto_srcs}
+  ${persistent_proto_hdrs})
+target_link_libraries(persistent_proto
+  absl::check
+  ${_REFLECTION}
+  ${_PROTOBUF_LIBPROTOBUF})
+
 add_library(libdb
   logic/storage/inmemory.cpp
   logic/storage/persistent.cpp
+  logic/storage/persistent_storage_collection.cpp
   logic/storage/swappable_memory_storage.cpp
   logic/filesystem/filesystem.cpp
   logic/recovery/wal_writer.cpp
@@ -121,6 +141,7 @@ target_link_libraries(iu9-db
   asio-grpc::asio-grpc
   api_grpc_proto
   wal_grpc_proto
+  persistent_proto
   absl::check
   absl::flags
   absl::flags_parse

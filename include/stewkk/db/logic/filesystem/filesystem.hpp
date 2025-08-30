@@ -20,7 +20,8 @@ fs::path GetPath(std::string_view extension);
 
 fs::path GetDataDir();
 
-Result<std::ofstream> CreateBinaryFile(fs::path path);
+Result<std::ofstream> CreateBinaryFile(fs::path path,
+                                       std::ifstream::openmode mode = std::ifstream::out);
 
 Result<std::ifstream> OpenBinaryFile(fs::path path);
 
