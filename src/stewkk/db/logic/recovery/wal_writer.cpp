@@ -61,6 +61,18 @@ Result<WALWriterImpl> NewWALWriter(boost::asio::executor executor) {
   return WALWriterImpl(std::move(executor), std::move(path), std::move(f));
 }
 
+Result<WALWriterImpl> LoadWALWriter(boost::asio::executor executor, fs::path path, int64_t seek) {
+  auto f_opt = filesystem::CreateBinaryFile(path, std::ofstream::in);
+  if (f_opt.has_failure()) {
+    return result::WrapError(std::move(f_opt), kFailedToCreate);
+  }
+  auto f = std::move(f_opt).assume_value();
+
+  f.seekp(seek);
+
+  return WALWriterImpl(std::move(executor), std::move(path), std::move(f));
+}
+
 fs::path WALWriterImpl::GetPath() const { return path_; }
 
 }  // namespace stewkk::db::logic::recovery

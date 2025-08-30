@@ -2,6 +2,9 @@
 
 #include <filesystem>
 
+#include <boost/asio/executor.hpp>
+
+#include <stewkk/db/logic/recovery/swappable_wal_writer_impl.hpp>
 #include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/logic/storage/memstorage.hpp>
 #include <stewkk/db/logic/storage/persistent_collection.hpp>
@@ -30,7 +33,8 @@ Result<std::vector<fs::path>> SearchWALFiles();
 
 void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage);
 
-Result<std::pair<storage::PersistentStorageCollection, storage::SwappableMemoryStorage>>
-InitializeStorages(size_t threshold = 5000);
+Result<std::tuple<storage::PersistentStorageCollection, storage::SwappableMemoryStorage,
+                  SwappableWalWriterImpl>>
+InitializeStorages(boost::asio::executor executor, size_t threshold = 5000);
 
 }  // namespace stewkk::db::logic::recovery

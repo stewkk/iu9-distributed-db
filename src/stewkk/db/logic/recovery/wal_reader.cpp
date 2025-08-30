@@ -7,6 +7,7 @@
 #include <wal.pb.h>
 
 #include <stewkk/db/logic/filesystem/filesystem.hpp>
+#include <stewkk/db/logic/recovery/swappable_wal_writer_impl.hpp>
 #include <stewkk/db/models/storage/kw_pair.hpp>
 
 namespace stewkk::db::logic::recovery {
@@ -49,6 +50,8 @@ Result<std::pair<std::vector<Operation>, int64_t>> ReadWAL(fs::path path) {
           entry.remove().key(),
           std::nullopt,
       });
+    } else {
+      LOG(ERROR) << std::format("bad entry in wal file: {}", path.string());
     }
   }
 
@@ -93,16 +96,18 @@ void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage
   }
 }
 
-Result<std::pair<storage::PersistentStorageCollection, storage::SwappableMemoryStorage>>
-InitializeStorages(size_t threshold) {
+Result<std::tuple<storage::PersistentStorageCollection, storage::SwappableMemoryStorage,
+                  SwappableWalWriterImpl>>
+InitializeStorages(boost::asio::executor executor, size_t threshold) {
   storage::PersistentStorageCollection persistent_collection;
   storage::SwappableMemoryStorage memstorage;
-  auto files = SearchWALFiles().value();
+  std::optional<SwappableWalWriterImpl> wal_writer = std::nullopt;
+  auto files = SearchWALFiles().value();  // TODO
   if (files.size() > 2) {
     LOG(WARNING) << "more than 2 WAL files";
   }
   for (const auto& file : files) {
-    auto [operations, position] = ReadWAL(file).value();
+    auto [operations, position] = ReadWAL(file).value();  // TODO
     storage::MapStorage storage;
     Apply(operations, storage);
     if (storage.Size() > threshold) {
@@ -112,16 +117,29 @@ InitializeStorages(size_t threshold) {
         return result::WrapError(std::move(persistent_opt),
                                  "failed to initialize persistent storage");
       }
-      auto got = persistent_collection.Add(std::move(persistent_opt).assume_value());
-      if (got.has_failure()) {
-        return result::WrapError(std::move(got), "failed to initialize persistent collection");
+      auto err = persistent_collection.Add(std::move(persistent_opt).assume_value());
+      if (err.has_failure()) {
+        return result::WrapError(std::move(err), "failed to initialize persistent collection");
       }
+      fs::remove(file);
     } else {
       storage::MapStorage* ptr = new storage::MapStorage(std::move(storage));
       memstorage = storage::SwappableMemoryStorage{ptr};
+      auto wal_writer_opt = LoadSwappableWalWriter(executor, file, position);
+      if (wal_writer_opt.has_failure()) {
+        return result::WrapError(std::move(wal_writer_opt), "failed to load WAL");
+      }
+      wal_writer = std::move(wal_writer_opt).assume_value();
     }
   }
-  return {std::move(persistent_collection), std::move(memstorage)};
+  if (!wal_writer.has_value()) {
+    auto wal_writer_opt = NewSwappableWalWriter(executor);
+    if (wal_writer_opt.has_failure()) {
+      return result::WrapError(std::move(wal_writer_opt), "failed to create WAL");
+    }
+    wal_writer = std::move(wal_writer_opt).assume_value();
+  }
+  return {std::move(persistent_collection), std::move(memstorage), std::move(wal_writer).value()};
 }
 
 }  // namespace stewkk::db::logic::recovery

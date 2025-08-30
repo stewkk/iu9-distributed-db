@@ -21,6 +21,8 @@ public:
 
   virtual Result<RemoveWalCallback> Swap() override;
 
+  fs::path GetPath() const;
+
   virtual ~SwappableWalWriterImpl();
 
 private:
@@ -29,5 +31,8 @@ private:
 };
 
 result::Result<SwappableWalWriterImpl> NewSwappableWalWriter(boost::asio::executor executor);
+
+result::Result<SwappableWalWriterImpl> LoadSwappableWalWriter(boost::asio::executor executor,
+                                                              fs::path path, int64_t seek);
 
 }  // namespace stewkk::db::logic::recovery

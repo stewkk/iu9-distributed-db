@@ -38,6 +38,17 @@ result::Result<SwappableWalWriterImpl> NewSwappableWalWriter(boost::asio::execut
   return SwappableWalWriterImpl(writer_ptr, executor);
 }
 
+result::Result<SwappableWalWriterImpl> LoadSwappableWalWriter(boost::asio::executor executor,
+                                                              fs::path path, int64_t seek) {
+  auto got = LoadWALWriter(executor, path, seek);
+  if (got.has_failure()) {
+    return result::WrapError(std::move(got), "failed to create wal file");
+  }
+  auto& writer = got.assume_value();
+  WALWriterImpl* writer_ptr = new WALWriterImpl(std::move(writer));
+  return SwappableWalWriterImpl(writer_ptr, executor);
+}
+
 Result<> SwappableWalWriterImpl::Remove(const boost::asio::yield_context& yield, std::string key) {
   folly::hazptr_holder h = folly::make_hazard_pointer();
   WALWriterImpl* ptr = h.protect(writer_);
@@ -66,6 +77,12 @@ Result<RemoveWalCallback> SwappableWalWriterImpl::Swap() {
     std::error_code ec;
     fs::remove(path, ec);
   };
+}
+
+fs::path SwappableWalWriterImpl::GetPath() const {
+  folly::hazptr_holder h = folly::make_hazard_pointer();
+  WALWriterImpl* ptr = h.protect(writer_);
+  return ptr->GetPath();
 }
 
 }  // namespace stewkk::db::logic::recovery

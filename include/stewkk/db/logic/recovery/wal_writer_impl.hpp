@@ -43,4 +43,6 @@ private:
 
 Result<WALWriterImpl> NewWALWriter(boost::asio::executor executor);
 
+Result<WALWriterImpl> LoadWALWriter(boost::asio::executor executor, fs::path path, int64_t seek);
+
 }  // namespace stewkk::db::logic::recovery
