@@ -15,6 +15,7 @@ target_link_libraries(unittests PRIVATE
   gmock_main
   stewkk::libdb
   wal_grpc_proto
+  persistent_proto
 )
 target_include_directories(unittests PRIVATE "${CMAKE_BINARY_DIR}/src/stewkk/db")
 gtest_discover_tests(unittests)

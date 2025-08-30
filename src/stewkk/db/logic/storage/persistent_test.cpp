@@ -4,6 +4,7 @@
 
 #include <stewkk/db/logic/storage/memstorage_impl.hpp>
 #include <stewkk/db/logic/storage/persistent.hpp>
+#include <stewkk/db/logic/storage/persistent_collection.hpp>
 
 using ::testing::Eq;
 
@@ -37,6 +38,33 @@ TEST(PersistentStorageTest, SaveAndLoad) {
   auto persistent = LoadPersistentStorage(path).value();
 
   auto got = persistent.Get("key4");
+
+  ASSERT_THAT(got.value().value, Eq("value4"));
+}
+
+TEST(CollectionTest, Read) {
+  fs::remove_all(filesystem::GetDataDir());
+  fs::create_directory(filesystem::GetDataDir());
+  PersistentStorageCollection collection;
+  auto storage = NewPersistentStorage(InitStorage()).value();
+  collection.Add(std::move(storage)).value();
+
+  auto got = collection.Get("key4");
+
+  ASSERT_THAT(got.value().value, Eq("value4"));
+}
+
+TEST(CollectionTest, ReadExisting) {
+  fs::remove_all(filesystem::GetDataDir());
+  fs::create_directory(filesystem::GetDataDir());
+  {
+    PersistentStorageCollection collection;
+    auto storage = NewPersistentStorage(InitStorage()).value();
+    collection.Add(std::move(storage)).value();
+  }
+  PersistentStorageCollection collection;
+
+  auto got = collection.Get("key4");
 
   ASSERT_THAT(got.value().value, Eq("value4"));
 }

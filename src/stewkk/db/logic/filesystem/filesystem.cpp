@@ -37,8 +37,10 @@ Result<std::ofstream> CreateBinaryFile(fs::path path, std::ifstream::openmode mo
 Result<std::ifstream> OpenBinaryFile(fs::path path) {
   try {
     std::ifstream res;
-    res.exceptions(~std::ofstream::goodbit);
+    auto cur = res.exceptions();
+    res.exceptions(~std::ifstream::goodbit);
     res.open(path, std::ifstream::in | std::ifstream::binary);
+    res.exceptions(cur);
     return res;
   } catch (const std::exception& ex) {
     return MakeError("failed to open file at {}: {}", path.string(), ex.what());

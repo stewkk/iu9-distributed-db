@@ -17,7 +17,7 @@ Result<persistent::Metadata> ReadMetadata() {
   if (f_opt.has_failure()) {
     return result::MakeError("failed to open metadata file");
   }
-  auto f = std::move(f_opt).assume_value();
+  auto& f = f_opt.assume_value();
 
   persistent::Metadata metadata;
   bool is_ok = metadata.ParseFromIstream(&f);
@@ -29,17 +29,18 @@ Result<persistent::Metadata> ReadMetadata() {
 }
 
 Result<> AppendMetadata(const PersistentStorage& storage) {
-  auto f_opt = filesystem::CreateBinaryFile(kMetadata, std::ifstream::app);
+  persistent::Metadata metadata{};
+
+  auto metadata_opt = ReadMetadata();
+  if (metadata_opt.has_value()) {
+    metadata = metadata_opt.assume_value();
+  }
+
+  auto f_opt = filesystem::CreateBinaryFile(kMetadata, std::ofstream::trunc);
   if (f_opt.has_failure()) {
     return result::WrapError(std::move(f_opt), "failed to open metadata file");
   }
   auto& f = f_opt.assume_value();
-
-  auto metadata_opt = ReadMetadata();
-  if (metadata_opt.has_failure()) {
-    return metadata_opt.assume_error();
-  }
-  auto& metadata = metadata_opt.assume_value();
 
   auto entry = metadata.add_entry();
   entry->set_filename(storage.Path().filename());
@@ -53,13 +54,6 @@ Result<> AppendMetadata(const PersistentStorage& storage) {
 }
 
 std::vector<PersistentStorage> ReadCollection() {
-  auto f_opt = filesystem::OpenBinaryFD(kMetadata);
-  if (f_opt.has_failure()) {
-    LOG(ERROR) << "failed to open metadata file";
-    return {};
-  }
-  auto f = std::move(f_opt).assume_value();
-
   std::vector<PersistentStorage> result;
 
   auto metadata_opt = ReadMetadata();
