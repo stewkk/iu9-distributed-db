@@ -3,6 +3,9 @@
 #include <filesystem>
 
 #include <stewkk/db/logic/result/result.hpp>
+#include <stewkk/db/logic/storage/memstorage.hpp>
+#include <stewkk/db/logic/storage/persistent_collection.hpp>
+#include <stewkk/db/logic/storage/swappable_memstorage.hpp>
 
 namespace stewkk::db::logic::recovery {
 
@@ -24,5 +27,10 @@ struct Operation {
 Result<std::pair<std::vector<Operation>, int64_t>> ReadWAL(fs::path path);
 
 Result<std::vector<fs::path>> SearchWALFiles();
+
+void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage);
+
+Result<std::pair<storage::PersistentStorageCollection, storage::SwappableMemoryStorage>>
+InitializeStorages(size_t threshold = 5000);
 
 }  // namespace stewkk::db::logic::recovery

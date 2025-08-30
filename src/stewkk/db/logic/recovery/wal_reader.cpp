@@ -7,6 +7,7 @@
 #include <wal.pb.h>
 
 #include <stewkk/db/logic/filesystem/filesystem.hpp>
+#include <stewkk/db/models/storage/kw_pair.hpp>
 
 namespace stewkk::db::logic::recovery {
 
@@ -77,6 +78,50 @@ Result<std::vector<fs::path>> SearchWALFiles() {
     return result::MakeError("failed to search for .wal files: {}", ex.what());
   }
   return result;
+}
+
+void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage) {
+  for (auto& operation : operations) {
+    switch (operation.type) {
+      case OperationType::kInsert:
+        storage.Insert(models::storage::KwPair{operation.key, operation.value.value()});
+        break;
+      case OperationType::kRemove:
+        storage.Remove(operation.key);
+        break;
+    }
+  }
+}
+
+Result<std::pair<storage::PersistentStorageCollection, storage::SwappableMemoryStorage>>
+InitializeStorages(size_t threshold) {
+  storage::PersistentStorageCollection persistent_collection;
+  storage::SwappableMemoryStorage memstorage;
+  auto files = SearchWALFiles().value();
+  if (files.size() > 2) {
+    LOG(WARNING) << "more than 2 WAL files";
+  }
+  for (const auto& file : files) {
+    auto [operations, position] = ReadWAL(file).value();
+    storage::MapStorage storage;
+    Apply(operations, storage);
+    if (storage.Size() > threshold) {
+      auto persistent_opt
+          = storage::NewPersistentStorage(storage::ReadonlyMemoryStorage(std::move(storage)));
+      if (persistent_opt.has_failure()) {
+        return result::WrapError(std::move(persistent_opt),
+                                 "failed to initialize persistent storage");
+      }
+      auto got = persistent_collection.Add(std::move(persistent_opt).assume_value());
+      if (got.has_failure()) {
+        return result::WrapError(std::move(got), "failed to initialize persistent collection");
+      }
+    } else {
+      storage::MapStorage* ptr = new storage::MapStorage(std::move(storage));
+      memstorage = storage::SwappableMemoryStorage{ptr};
+    }
+  }
+  return {std::move(persistent_collection), std::move(memstorage)};
 }
 
 }  // namespace stewkk::db::logic::recovery
