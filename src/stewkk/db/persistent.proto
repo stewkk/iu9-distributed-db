@@ -2,6 +2,10 @@ syntax = "proto2";
 
 package persistent;
 
-message Metadata {
+message MetadataEntry {
   optional string filename = 1;
 };
+
+message Metadata {
+  repeated MetadataEntry entry = 1;
+}

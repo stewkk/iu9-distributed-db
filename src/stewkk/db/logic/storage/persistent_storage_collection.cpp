@@ -3,7 +3,6 @@
 #include <ranges>
 
 #include <absl/log/log.h>
-#include <google/protobuf/util/delimited_message_util.h>
 
 #include <persistent.pb.h>
 
@@ -13,17 +12,38 @@ namespace {
 
 constexpr static std::string_view kMetadata = "/tmp/iu9-distributed-db/persistent.metadata";
 
-Result<> AppendMetadata(const PersistentStorage& storage) {
-  auto got = filesystem::CreateBinaryFile(kMetadata, std::ifstream::app);
-  if (got.has_failure()) {
-    return result::WrapError(std::move(got), "failed to open metadata file");
+Result<persistent::Metadata> ReadMetadata() {
+  auto f_opt = filesystem::OpenBinaryFile(kMetadata);
+  if (f_opt.has_failure()) {
+    return result::MakeError("failed to open metadata file");
   }
-  auto& f = got.assume_value();
+  auto f = std::move(f_opt).assume_value();
 
   persistent::Metadata metadata;
-  metadata.set_filename(storage.Path());
+  bool is_ok = metadata.ParseFromIstream(&f);
+  if (!is_ok) {
+    return result::MakeError("failed to parse metadata file");
+  }
 
-  bool is_ok = google::protobuf::util::SerializeDelimitedToOstream(std::move(metadata), &f);
+  return metadata;
+}
+
+Result<> AppendMetadata(const PersistentStorage& storage) {
+  auto f_opt = filesystem::CreateBinaryFile(kMetadata, std::ifstream::app);
+  if (f_opt.has_failure()) {
+    return result::WrapError(std::move(f_opt), "failed to open metadata file");
+  }
+  auto& f = f_opt.assume_value();
+
+  auto metadata_opt = ReadMetadata();
+  if (metadata_opt.has_failure()) {
+    return metadata_opt.assume_error();
+  }
+  auto& metadata = metadata_opt.assume_value();
+
+  auto entry = metadata.add_entry();
+  entry->set_filename(storage.Path().filename());
+  bool is_ok = metadata.SerializeToOstream(&f);
   f.flush();
 
   if (!is_ok) {
@@ -40,23 +60,19 @@ std::vector<PersistentStorage> ReadCollection() {
   }
   auto f = std::move(f_opt).assume_value();
 
-  google::protobuf::io::FileInputStream stream(f);
   std::vector<PersistentStorage> result;
 
-  for (;;) {
-    persistent::Metadata metadata;
-    bool is_eof = false;
-    bool is_ok
-        = google::protobuf::util::ParseDelimitedFromZeroCopyStream(&metadata, &stream, &is_eof);
-    if (is_eof) {
-      break;
-    }
-    if (!is_ok) {
-      LOG(ERROR) << "found bad entry in metadata file";
-      return result;
-    }
+  auto metadata_opt = ReadMetadata();
+  if (metadata_opt.has_failure()) {
+    LOG(ERROR) << "failed to read metadata file";
+    return result;
+  }
+  auto& metadata = metadata_opt.assume_value();
 
-    auto got = LoadPersistentStorage(metadata.filename());
+  for (int i = 0; i < metadata.entry_size(); i++) {
+    const auto& entry = metadata.entry(i);
+
+    auto got = LoadPersistentStorage(filesystem::GetDataDir() / entry.filename());
     if (got.has_failure()) {
       LOG(ERROR) << "failed to load metadata file";
       continue;
