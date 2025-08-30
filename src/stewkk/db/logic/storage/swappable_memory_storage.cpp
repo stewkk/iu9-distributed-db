@@ -6,9 +6,25 @@ namespace stewkk::db::logic::storage {
 
 SwappableMemoryStorage::SwappableMemoryStorage() : storage_ptr_(new MapStorage) {}
 
+SwappableMemoryStorage::SwappableMemoryStorage(MapStorage* other) : storage_ptr_(other) {}
+
 SwappableMemoryStorage::~SwappableMemoryStorage() {
   auto ptr = storage_ptr_.exchange(nullptr);
-  ptr->retire();
+  if (ptr != nullptr) {
+    ptr->retire();
+  }
+}
+
+SwappableMemoryStorage::SwappableMemoryStorage(SwappableMemoryStorage&& other)
+    : storage_ptr_(other.storage_ptr_.exchange(nullptr)) {}
+
+SwappableMemoryStorage& SwappableMemoryStorage::operator=(SwappableMemoryStorage&& other) {
+  auto current = storage_ptr_.exchange(nullptr);
+  if (current != nullptr) {
+    current->retire();
+  }
+  storage_ptr_ = other.storage_ptr_.exchange(nullptr);
+  return *this;
 }
 
 Result<KwPair> SwappableMemoryStorage::Get(std::string key) {
@@ -17,7 +33,7 @@ Result<KwPair> SwappableMemoryStorage::Get(std::string key) {
   return ptr->Get(std::move(key));
 }
 
-Result<> SwappableMemoryStorage::Remove(std::string key) {
+void SwappableMemoryStorage::Remove(std::string key) {
   folly::hazptr_holder h = folly::make_hazard_pointer();
   MapStorage* ptr = h.protect(storage_ptr_);
   return ptr->Remove(std::move(key));

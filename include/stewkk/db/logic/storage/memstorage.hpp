@@ -13,7 +13,7 @@ using result::Result;
 class KwStorage {
 public:
   virtual Result<KwPair> Get(std::string key) = 0;
-  virtual Result<> Remove(std::string key) = 0;
+  virtual void Remove(std::string key) = 0;
   virtual void Insert(KwPair data) = 0;
   virtual void Clear() = 0;
 

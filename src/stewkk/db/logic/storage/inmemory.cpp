@@ -3,7 +3,6 @@
 namespace stewkk::db::logic::storage {
 
 using result::MakeError;
-using result::Ok;
 
 namespace {
 
@@ -22,16 +21,15 @@ Result<KwPair> MapStorage::Get(std::string key) {
   return KwPair{.key = std::move(key), .value = std::move(value)};
 }
 
-Result<> MapStorage::Remove(std::string key) {
-  map_.erase(std::move(key));
-  return Ok();
-}
+void MapStorage::Remove(std::string key) { map_.erase(std::move(key)); }
 
 void MapStorage::Insert(KwPair data) {
   map_.insert_or_assign(std::move(data.key), std::move(data.value));
 }
 
 void MapStorage::Clear() { map_.clear(); }
+
+size_t MapStorage::Size() const { return map_.size(); }
 
 MapStorage::Map&& MapStorage::MoveUnderlying() { return std::move(map_); }
 

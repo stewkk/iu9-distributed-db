@@ -8,7 +8,7 @@ using ::testing::Eq;
 namespace stewkk::db::logic::storage {
 
 TEST(SwappableStorageTest, Get) {
-  MapStorage storage;
+  SwappableMemoryStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
 
@@ -18,7 +18,7 @@ TEST(SwappableStorageTest, Get) {
 }
 
 TEST(SwappableStorageTest, Collect) {
-  MapStorage storage;
+  SwappableMemoryStorage storage;
   storage.Insert(KwPair{.key = "key0", .value = "value0"});
   storage.Insert(KwPair{.key = "key1", .value = "value1"});
   storage.Insert(KwPair{.key = "key2", .value = "value2"});
@@ -37,7 +37,7 @@ TEST(SwappableStorageTest, Collect) {
 }
 
 TEST(SwappableStorageTest, GetAfterCollect) {
-  MapStorage storage;
+  SwappableMemoryStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
   auto _ = storage.Collect();
@@ -48,7 +48,7 @@ TEST(SwappableStorageTest, GetAfterCollect) {
 }
 
 TEST(SwappableStorageTest, InsertAfterCollect) {
-  MapStorage storage;
+  SwappableMemoryStorage storage;
   storage.Insert(KwPair{.key = "key0", .value = "value0"});
   auto _ = storage.Collect();
   storage.Insert(KwPair{.key = "key1", .value = "value1"});

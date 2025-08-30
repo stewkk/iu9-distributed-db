@@ -14,7 +14,7 @@ async def test_get(app_client):
 async def test_not_found(app_client):
     response = app_client.Get("oaoa")
 
-    assert response == (grpc.StatusCode.NOT_FOUND, 'failed to get value from memory storage: key oaoa not found in storage')
+    assert response == (grpc.StatusCode.NOT_FOUND, 'key oaoa not found')
 
 
 async def test_remove(app_client):

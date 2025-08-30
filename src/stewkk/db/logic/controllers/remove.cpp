@@ -8,10 +8,7 @@ result::Result<> Controller::Remove(const boost::asio::yield_context& yield, Key
   if (res.has_failure()) {
     return res;
   }
-  res = storage_.Remove(std::move(key));
-  if (res.has_failure()) {
-    return result::WrapError(std::move(res), "failed to remove value from memory storage");
-  }
+  storage_.Remove(std::move(key));
   return result::Ok();
 }
 

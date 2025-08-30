@@ -12,6 +12,10 @@ SwappableWalWriterImpl::SwappableWalWriterImpl(SwappableWalWriterImpl&& other)
     : writer_(other.writer_.exchange(nullptr)), executor_(std::move(other.executor_)) {}
 
 SwappableWalWriterImpl& SwappableWalWriterImpl::operator=(SwappableWalWriterImpl&& other) {
+  auto current = writer_.exchange(nullptr);
+  if (current != nullptr) {
+    current->retire();
+  }
   writer_ = other.writer_.exchange(nullptr);
   executor_ = std::move(other.executor_);
   return *this;

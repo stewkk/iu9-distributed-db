@@ -31,17 +31,11 @@ TEST(MemoryStorageTest, GetAfterRemove) {
   MapStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
-  auto _ = storage.Remove("key");
+  storage.Remove("key");
 
   auto got = storage.Get("key");
 
   ASSERT_THAT(got.has_error(), IsTrue);
-}
-
-TEST(MemoryStorageTest, RemoveNonExisting) {
-  MapStorage storage;
-
-  storage.Remove("abc").value();
 }
 
 TEST(MemoryStorageTest, InsertUpdatesExistingKey) {

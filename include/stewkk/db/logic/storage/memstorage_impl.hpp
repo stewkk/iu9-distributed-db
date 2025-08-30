@@ -27,11 +27,13 @@ public:
   explicit MapStorage(Map&& other);
 
   virtual Result<KwPair> Get(std::string key) override;
-  virtual Result<> Remove(std::string key) override;
+  virtual void Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
   virtual void Clear() override;
 
   virtual std::vector<KwPair> Collect() override;
+
+  size_t Size() const;
 
   Map&& MoveUnderlying();
 
