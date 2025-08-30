@@ -102,12 +102,20 @@ InitializeStorages(boost::asio::executor executor, size_t threshold) {
   storage::PersistentStorageCollection persistent_collection;
   storage::SwappableMemoryStorage memstorage;
   std::optional<SwappableWalWriterImpl> wal_writer = std::nullopt;
-  auto files = SearchWALFiles().value();  // TODO
+  auto files_opt = SearchWALFiles();
+  if (files_opt.has_failure()) {
+    return files_opt.assume_error();
+  }
+  auto files = std::move(files_opt).assume_value();
   if (files.size() > 2) {
     LOG(WARNING) << "more than 2 WAL files";
   }
   for (const auto& file : files) {
-    auto [operations, position] = ReadWAL(file).value();  // TODO
+    auto err = ReadWAL(file);
+    if (err.has_failure()) {
+      return err.assume_error();
+    }
+    auto [operations, position] = err.assume_value();
     storage::MapStorage storage;
     Apply(operations, storage);
     if (storage.Size() > threshold) {
