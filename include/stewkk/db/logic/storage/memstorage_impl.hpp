@@ -20,18 +20,18 @@ class MapStorage : public KwStorage,
                    public CollectableStorage,
                    public folly::hazptr_obj_base<MapStorage> {
 private:
-  using Map = boost::concurrent_flat_map<std::string, std::string>;
+  using Map = boost::concurrent_flat_map<std::string, std::optional<std::string>>;
 
 public:
   MapStorage() = default;
   explicit MapStorage(Map&& other);
 
-  virtual Result<KwPair> Get(std::string key) override;
+  virtual Result<std::optional<std::string>> Get(std::string key) override;
   virtual void Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
   virtual void Clear() override;
 
-  virtual std::vector<KwPair> Collect() override;
+  virtual std::vector<StorageEntry> Collect() override;
 
   size_t Size() const;
 
@@ -43,14 +43,14 @@ private:
 
 class ReadonlyMemoryStorage {
 private:
-  using Map = boost::unordered::unordered_flat_map<std::string, std::string>;
+  using Map = boost::unordered::unordered_flat_map<std::string, std::optional<std::string>>;
 
 public:
   ReadonlyMemoryStorage(MapStorage&& storage);
 
   struct Iterator {
     using difference_type = std::ptrdiff_t;
-    using value_type = KwPair;
+    using value_type = StorageEntry;
 
     value_type operator*() const;
 

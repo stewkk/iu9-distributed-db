@@ -5,6 +5,7 @@
 
 using ::testing::Eq;
 using ::testing::IsTrue;
+using ::testing::Optional;
 using ::testing::StrEq;
 
 namespace stewkk::db::logic::storage {
@@ -16,7 +17,7 @@ TEST(MemoryStorageTest, Get) {
 
   auto got = storage.Get("key");
 
-  ASSERT_THAT(got.value(), Eq(data));
+  ASSERT_THAT(got.value(), Optional(std::string{"value"}));
 }
 
 TEST(MemoryStorageTest, GetNonExisting) {
@@ -47,7 +48,7 @@ TEST(MemoryStorageTest, InsertUpdatesExistingKey) {
   storage.Insert(data);
   auto got = storage.Get("key");
 
-  ASSERT_THAT(got.value().value, Eq("other"));
+  ASSERT_THAT(got.value().value(), Eq("other"));
 }
 
 }  // namespace stewkk::db::logic::storage

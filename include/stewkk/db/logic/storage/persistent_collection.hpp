@@ -10,7 +10,7 @@ public:
   PersistentStorageCollection();
 
   Result<> Add(PersistentStorage&& storage);
-  Result<KwPair> Get(std::string_view key);
+  Result<StorageEntry> Get(std::string_view key);
 
 private:
   std::vector<PersistentStorage> collection_;

@@ -12,13 +12,13 @@ constexpr static std::string_view kNotFound{"key {} not found in storage"};
 
 MapStorage::MapStorage(Map&& other) : map_(std::move(other)) {}
 
-Result<KwPair> MapStorage::Get(std::string key) {
-  std::string value;
+Result<std::optional<std::string>> MapStorage::Get(std::string key) {
+  std::optional<std::string> value;
   bool found = map_.visit(key, [&value](const auto& x) { value = x.second; });
   if (!found) {
     return MakeError<result::ErrorType::kNotFound>(kNotFound, key);
   }
-  return KwPair{.key = std::move(key), .value = std::move(value)};
+  return value;
 }
 
 void MapStorage::Remove(std::string key) { map_.erase(std::move(key)); }
@@ -33,10 +33,10 @@ size_t MapStorage::Size() const { return map_.size(); }
 
 MapStorage::Map&& MapStorage::MoveUnderlying() { return std::move(map_); }
 
-std::vector<KwPair> MapStorage::Collect() {
+std::vector<StorageEntry> MapStorage::Collect() {
   auto readonly = ReadonlyMemoryStorage(std::move(*this));
   map_ = Map();
-  return std::vector<KwPair>{readonly.begin(), readonly.end()};
+  return {readonly.begin(), readonly.end()};
 }
 
 ReadonlyMemoryStorage::ReadonlyMemoryStorage(MapStorage&& storage)
@@ -48,7 +48,7 @@ ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::begin() const {
 ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::end() const { return Iterator{map_.cend()}; }
 
 ReadonlyMemoryStorage::Iterator::value_type ReadonlyMemoryStorage::Iterator::operator*() const {
-  return KwPair{.key = map_iterator_->first, .value = map_iterator_->second};
+  return StorageEntry{map_iterator_->first, map_iterator_->second};
 }
 
 ReadonlyMemoryStorage::Iterator& ReadonlyMemoryStorage::Iterator::operator++() {

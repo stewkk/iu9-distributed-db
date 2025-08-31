@@ -69,4 +69,6 @@ TEST(CollectionTest, ReadExisting) {
   ASSERT_THAT(got.value().value, Eq("value4"));
 }
 
+TEST(CollectionTest, InsertThanRemove) {}
+
 }  // namespace stewkk::db::logic::storage

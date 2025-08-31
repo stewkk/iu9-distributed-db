@@ -4,6 +4,7 @@
 #include <stewkk/db/logic/storage/swappable_memstorage.hpp>
 
 using ::testing::Eq;
+using ::testing::Optional;
 
 namespace stewkk::db::logic::storage {
 
@@ -14,7 +15,7 @@ TEST(SwappableStorageTest, Get) {
 
   auto got = storage.Get("key");
 
-  ASSERT_THAT(got.value(), Eq(data));
+  ASSERT_THAT(got.value(), Optional(std::string{"value"}));
 }
 
 TEST(SwappableStorageTest, Collect) {
@@ -27,12 +28,12 @@ TEST(SwappableStorageTest, Collect) {
 
   auto got = storage.Collect();
 
-  ASSERT_THAT(got, Eq(std::vector<KwPair>{
-                       KwPair{.key = "key0", .value = "value0"},
-                       KwPair{.key = "key1", .value = "value1"},
-                       KwPair{.key = "key2", .value = "value2"},
-                       KwPair{.key = "key3", .value = "value3"},
-                       KwPair{.key = "key4", .value = "value4"},
+  ASSERT_THAT(got, Eq(std::vector<StorageEntry>{
+                       {.key = "key0", .value = "value0"},
+                       {.key = "key1", .value = "value1"},
+                       {.key = "key2", .value = "value2"},
+                       {.key = "key3", .value = "value3"},
+                       {.key = "key4", .value = "value4"},
                    }));
 }
 
@@ -55,7 +56,7 @@ TEST(SwappableStorageTest, InsertAfterCollect) {
 
   auto got = storage.Get("key1").value();
 
-  ASSERT_THAT(got, Eq(KwPair{.key = "key1", .value = "value1"}));
+  ASSERT_THAT(got, Optional(std::string{"value1"}));
 }
 
 }  // namespace stewkk::db::logic::storage

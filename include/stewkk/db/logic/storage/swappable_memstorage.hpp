@@ -21,12 +21,12 @@ public:
   SwappableMemoryStorage& operator=(const SwappableMemoryStorage& other) = delete;
   SwappableMemoryStorage& operator=(SwappableMemoryStorage&& other);
 
-  virtual Result<KwPair> Get(std::string key) override;
+  virtual Result<std::optional<std::string>> Get(std::string key) override;
   virtual void Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
   virtual void Clear() override;
 
-  virtual std::vector<KwPair> Collect() override;
+  virtual std::vector<StorageEntry> Collect() override;
 
 private:
   std::atomic<MapStorage*> storage_ptr_;

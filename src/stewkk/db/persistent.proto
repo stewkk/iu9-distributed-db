@@ -8,4 +8,14 @@ message MetadataEntry {
 
 message Metadata {
   repeated MetadataEntry entry = 1;
-}
+};
+
+message TableIndex {
+  optional uint64 map_size = 1;
+  repeated uint64 index = 2;
+};
+
+message Entry {
+  optional string key = 1;
+  optional string value = 2;
+};

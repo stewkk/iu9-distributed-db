@@ -90,7 +90,7 @@ Result<> PersistentStorageCollection::Add(PersistentStorage&& storage) {
   return result::Ok();
 }
 
-Result<KwPair> PersistentStorageCollection::Get(std::string_view key) {
+Result<StorageEntry> PersistentStorageCollection::Get(std::string_view key) {
   auto reversed = collection_ | std::ranges::views::reverse;
   for (auto& storage : reversed) {
     auto res = storage.Get(key);

@@ -26,8 +26,10 @@ static constexpr std::string_view kDir = "/tmp/iu9-distributed-db";
 Result<std::ofstream> CreateBinaryFile(fs::path path, std::ifstream::openmode mode) {
   try {
     std::ofstream res;
+    auto cur = res.exceptions();
     res.exceptions(~std::ofstream::goodbit);
     res.open(path, mode | std::ofstream::binary);
+    res.exceptions(cur);
     return res;
   } catch (const std::exception& ex) {
     return MakeError("failed to create file at {}: {}", path.string(), ex.what());

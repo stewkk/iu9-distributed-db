@@ -51,7 +51,7 @@ TEST(RecoveryTest, MemstorageInitialization) {
       = InitializeStorages(ctx.get_executor(), 1).value();
 
   auto got1 = persistent_collection.Get("a").value().value;
-  auto got2 = memstorage.Get("c").value().value;
+  auto got2 = memstorage.Get("c").value().value();
 
   ASSERT_THAT(got1, Eq("b"));
   ASSERT_THAT(got2, Eq("d"));

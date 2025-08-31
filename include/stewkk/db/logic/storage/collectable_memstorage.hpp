@@ -7,12 +7,19 @@
 
 namespace stewkk::db::logic::storage {
 
-using models::storage::KwPair;
 using result::Result;
+
+// TODO: вынести в отдельный файл
+struct StorageEntry {
+  std::string key;
+  std::optional<std::string> value;
+
+  auto operator<=>(const StorageEntry& other) const = default;
+};
 
 class CollectableStorage {
 public:
-  virtual std::vector<KwPair> Collect() = 0;
+  virtual std::vector<StorageEntry> Collect() = 0;
 
   virtual ~CollectableStorage() = default;
 };

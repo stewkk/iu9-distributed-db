@@ -27,7 +27,7 @@ SwappableMemoryStorage& SwappableMemoryStorage::operator=(SwappableMemoryStorage
   return *this;
 }
 
-Result<KwPair> SwappableMemoryStorage::Get(std::string key) {
+Result<std::optional<std::string>> SwappableMemoryStorage::Get(std::string key) {
   folly::hazptr_holder h = folly::make_hazard_pointer();
   MapStorage* ptr = h.protect(storage_ptr_);
   return ptr->Get(std::move(key));
@@ -51,7 +51,7 @@ void SwappableMemoryStorage::Clear() {
   ptr->Clear();
 }
 
-std::vector<KwPair> SwappableMemoryStorage::Collect() {
+std::vector<StorageEntry> SwappableMemoryStorage::Collect() {
   auto new_storage = new MapStorage;
   auto current_storage = storage_ptr_.exchange(new_storage);
   auto res = current_storage->Collect();
