@@ -29,6 +29,18 @@ TEST(PersistentStorageTest, Get) {
   ASSERT_THAT(got.value().value, Eq("value4"));
 }
 
+TEST(PersistentStorageTest, Erased) {
+  MapStorage memory;
+  memory.Insert({"key", "value"});
+  memory.Remove("key");
+  PersistentStorage persistent
+      = NewPersistentStorage(ReadonlyMemoryStorage(std::move(memory))).value();
+
+  auto got = persistent.Get("key");
+
+  ASSERT_THAT(got.value().value, Eq(std::nullopt));
+}
+
 TEST(PersistentStorageTest, SaveAndLoad) {
   fs::path path;
   {

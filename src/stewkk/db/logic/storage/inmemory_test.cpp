@@ -34,9 +34,9 @@ TEST(MemoryStorageTest, GetAfterRemove) {
   storage.Insert(data);
   storage.Remove("key");
 
-  auto got = storage.Get("key");
+  auto got = storage.Get("key").value();
 
-  ASSERT_THAT(got.has_error(), IsTrue);
+  ASSERT_THAT(got, Eq(std::nullopt));
 }
 
 TEST(MemoryStorageTest, InsertUpdatesExistingKey) {

@@ -21,7 +21,7 @@ Result<std::optional<std::string>> MapStorage::Get(std::string key) {
   return value;
 }
 
-void MapStorage::Remove(std::string key) { map_.erase(std::move(key)); }
+void MapStorage::Remove(std::string key) { map_.insert_or_assign(std::move(key), std::nullopt); }
 
 void MapStorage::Insert(KwPair data) {
   map_.insert_or_assign(std::move(data.key), std::move(data.value));
