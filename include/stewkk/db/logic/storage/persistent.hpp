@@ -19,7 +19,13 @@ namespace fs = std::filesystem;
 
 class PersistentStorage {
 public:
-  PersistentStorage(fs::path path, std::vector<uint64_t> index);
+  PersistentStorage(fs::path path, int fd, std::vector<uint64_t> index);
+  ~PersistentStorage();
+  PersistentStorage(const PersistentStorage& other) = delete;
+  PersistentStorage(PersistentStorage&& other);
+  PersistentStorage& operator=(const PersistentStorage& other) = delete;
+  PersistentStorage& operator=(PersistentStorage&& other);
+
   Result<StorageEntry> Get(std::string_view key);
   fs::path Path() const;
 
@@ -28,6 +34,7 @@ private:
 
 private:
   fs::path path_;
+  int fd_;
 
   std::vector<uint64_t> index_;
 };

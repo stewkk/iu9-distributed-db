@@ -65,11 +65,19 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<StorageEntry> data) {
   }
   persistent_index.SerializeToOstream(&index_f_opt.assume_value());
 
-  return PersistentStorage(std::move(path), std::move(index));
+  f.flush();
+
+  auto fd_opt = filesystem::OpenBinaryFD(path);
+  if (fd_opt.has_failure()) {
+    return WrapError(std::move(fd_opt), "failed to open persistent storage");
+  }
+  auto fd = std::move(fd_opt).assume_value();
+
+  return PersistentStorage(std::move(path), fd, std::move(index));
 }
 
-PersistentStorage::PersistentStorage(fs::path path, std::vector<uint64_t> index)
-    : path_(std::move(path)), index_(std::move(index)) {}
+PersistentStorage::PersistentStorage(fs::path path, int fd, std::vector<uint64_t> index)
+    : path_(std::move(path)), fd_(fd), index_(std::move(index)) {}
 
 fs::path PersistentStorage::Path() const { return path_; }
 
@@ -108,19 +116,38 @@ Result<PersistentStorage> LoadPersistentStorage(fs::path path) {
 
   std::vector<uint64_t> index(header.index().cbegin(), header.index().cend());
 
-  return PersistentStorage(std::move(path), std::move(index));
-}
-
-Result<StorageEntry> PersistentStorage::ReadEntryAt(uint64_t offset) {
-  auto f_opt = filesystem::OpenBinaryFile(path_);
+  auto f_opt = filesystem::OpenBinaryFD(path);
   if (f_opt.has_failure()) {
     return WrapError(std::move(f_opt), "failed to open persistent storage");
   }
-  auto f = std::move(f_opt).assume_value();
+  auto fd = std::move(f_opt).assume_value();
 
-  f.seekg(offset);
+  return PersistentStorage(std::move(path), fd, std::move(index));
+}
+
+PersistentStorage::~PersistentStorage() {
+  if (fd_ != -1) {
+    close(fd_);
+  }
+}
+
+PersistentStorage::PersistentStorage(PersistentStorage&& other)
+    : fd_(std::move(other.fd_)), path_(std::move(other.path_)), index_(std::move(other.index_)) {
+  other.fd_ = -1;
+}
+
+PersistentStorage& PersistentStorage::operator=(PersistentStorage&& other) {
+  fd_ = std::move(other.fd_);
+  other.fd_ = -1;
+  path_ = std::move(other.path_);
+  index_ = std::move(other.index_);
+  return *this;
+}
+
+Result<StorageEntry> PersistentStorage::ReadEntryAt(uint64_t offset) {
+  lseek(fd_, offset, SEEK_SET);
+  google::protobuf::io::FileInputStream stream(fd_);
   persistent::Entry entry;
-  google::protobuf::io::IstreamInputStream stream(&f);
   bool is_ok = google::protobuf::util::ParseDelimitedFromZeroCopyStream(&entry, &stream, nullptr);
   if (!is_ok) {
     return MakeError("failed to read entry from persistent storage");
