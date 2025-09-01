@@ -10,7 +10,7 @@ namespace stewkk::db::logic::recovery {
 
 class SwappableWalWriterImpl : public WALWriter, public SwappableWalWriter {
 public:
-  SwappableWalWriterImpl(WALWriterImpl* writer, boost::asio::executor);
+  SwappableWalWriterImpl(WALWriterImpl* writer, boost::asio::any_io_executor);
   SwappableWalWriterImpl(const SwappableWalWriterImpl& other) = delete;
   SwappableWalWriterImpl(SwappableWalWriterImpl&& other);
   SwappableWalWriterImpl& operator=(const SwappableWalWriterImpl& other) = delete;
@@ -27,12 +27,12 @@ public:
 
 private:
   std::atomic<WALWriterImpl*> writer_;
-  boost::asio::executor executor_;
+  boost::asio::any_io_executor executor_;
 };
 
-result::Result<SwappableWalWriterImpl> NewSwappableWalWriter(boost::asio::executor executor);
+result::Result<SwappableWalWriterImpl> NewSwappableWalWriter(boost::asio::any_io_executor executor);
 
-result::Result<SwappableWalWriterImpl> LoadSwappableWalWriter(boost::asio::executor executor,
+result::Result<SwappableWalWriterImpl> LoadSwappableWalWriter(boost::asio::any_io_executor executor,
                                                               fs::path path, int64_t seek);
 
 }  // namespace stewkk::db::logic::recovery

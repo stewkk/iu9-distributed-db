@@ -13,7 +13,8 @@ static constexpr std::string_view kFailedToCreate = "failed to create WAL";
 
 }  // namespace
 
-WALWriterImpl::WALWriterImpl(boost::asio::executor executor, fs::path path, std::ofstream&& stream)
+WALWriterImpl::WALWriterImpl(boost::asio::any_io_executor executor, fs::path path,
+                             std::ofstream&& stream)
     : path_(std::move(path)),
       f_(std::move(stream)),
       strand_(boost::asio::make_strand(executor)),
@@ -48,7 +49,7 @@ Result<> WALWriterImpl::Insert(const boost::asio::yield_context& yield, KwPair d
   return WriteEntry(yield, std::move(entry));
 }
 
-Result<WALWriterImpl> NewWALWriter(boost::asio::executor executor) {
+Result<WALWriterImpl> NewWALWriter(boost::asio::any_io_executor executor) {
   auto extension = "wal";
   auto path = filesystem::GetPath(extension);
   LOG(INFO) << std::format("creating new WAL at {}", path.string());
@@ -61,7 +62,8 @@ Result<WALWriterImpl> NewWALWriter(boost::asio::executor executor) {
   return WALWriterImpl(std::move(executor), std::move(path), std::move(f));
 }
 
-Result<WALWriterImpl> LoadWALWriter(boost::asio::executor executor, fs::path path, int64_t seek) {
+Result<WALWriterImpl> LoadWALWriter(boost::asio::any_io_executor executor, fs::path path,
+                                    int64_t seek) {
   auto f_opt = filesystem::CreateBinaryFile(path, std::ofstream::in);
   if (f_opt.has_failure()) {
     return result::WrapError(std::move(f_opt), kFailedToCreate);

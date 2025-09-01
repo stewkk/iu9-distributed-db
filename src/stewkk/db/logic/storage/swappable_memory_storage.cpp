@@ -51,6 +51,12 @@ void SwappableMemoryStorage::Clear() {
   ptr->Clear();
 }
 
+size_t SwappableMemoryStorage::Size() const {
+  folly::hazptr_holder h = folly::make_hazard_pointer();
+  MapStorage* ptr = h.protect(storage_ptr_);
+  return ptr->Size();
+}
+
 std::vector<StorageEntry> SwappableMemoryStorage::Collect() {
   auto new_storage = new MapStorage;
   auto current_storage = storage_ptr_.exchange(new_storage);

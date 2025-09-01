@@ -30,10 +30,9 @@ public:
   virtual void Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
   virtual void Clear() override;
+  virtual size_t Size() const override;
 
   virtual std::vector<StorageEntry> Collect() override;
-
-  size_t Size() const;
 
   Map&& MoveUnderlying();
 

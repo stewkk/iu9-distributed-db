@@ -98,7 +98,7 @@ void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage
 
 Result<std::tuple<storage::PersistentStorageCollection, storage::SwappableMemoryStorage,
                   SwappableWalWriterImpl>>
-InitializeStorages(boost::asio::executor executor, size_t threshold) {
+InitializeStorages(boost::asio::any_io_executor executor, size_t threshold) {
   storage::PersistentStorageCollection persistent_collection;
   storage::SwappableMemoryStorage memstorage;
   std::optional<SwappableWalWriterImpl> wal_writer = std::nullopt;

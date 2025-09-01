@@ -5,7 +5,7 @@
 namespace stewkk::db::logic::recovery {
 
 SwappableWalWriterImpl::SwappableWalWriterImpl(WALWriterImpl* writer,
-                                               boost::asio::executor executor)
+                                               boost::asio::any_io_executor executor)
     : writer_(writer), executor_(std::move(executor)) {}
 
 SwappableWalWriterImpl::SwappableWalWriterImpl(SwappableWalWriterImpl&& other)
@@ -28,7 +28,8 @@ SwappableWalWriterImpl::~SwappableWalWriterImpl() {
   }
 }
 
-result::Result<SwappableWalWriterImpl> NewSwappableWalWriter(boost::asio::executor executor) {
+result::Result<SwappableWalWriterImpl> NewSwappableWalWriter(
+    boost::asio::any_io_executor executor) {
   auto got = NewWALWriter(executor);
   if (got.has_failure()) {
     return result::WrapError(std::move(got), "failed to create wal file");
@@ -38,7 +39,7 @@ result::Result<SwappableWalWriterImpl> NewSwappableWalWriter(boost::asio::execut
   return SwappableWalWriterImpl(writer_ptr, executor);
 }
 
-result::Result<SwappableWalWriterImpl> LoadSwappableWalWriter(boost::asio::executor executor,
+result::Result<SwappableWalWriterImpl> LoadSwappableWalWriter(boost::asio::any_io_executor executor,
                                                               fs::path path, int64_t seek) {
   auto got = LoadWALWriter(executor, path, seek);
   if (got.has_failure()) {

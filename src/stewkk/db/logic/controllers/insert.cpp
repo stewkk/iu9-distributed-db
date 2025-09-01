@@ -10,6 +10,8 @@ result::Result<> Controller::Insert(const boost::asio::yield_context& yield, KwD
     return res;
   }
   storage_.Insert(std::move(kw_pair));
+
+  TriggerSwapToPersistentStorage();
   return result::Ok();
 }
 

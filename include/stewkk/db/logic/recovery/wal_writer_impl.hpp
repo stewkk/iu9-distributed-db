@@ -24,7 +24,7 @@ namespace fs = std::filesystem;
 
 class WALWriterImpl : public WALWriter, public folly::hazptr_obj_base<WALWriterImpl> {
 public:
-  WALWriterImpl(boost::asio::executor context, fs::path path, std::ofstream&& stream);
+  WALWriterImpl(boost::asio::any_io_executor context, fs::path path, std::ofstream&& stream);
 
   virtual Result<> Remove(const boost::asio::yield_context& yield, std::string key) override;
   virtual Result<> Insert(const boost::asio::yield_context& yield, KwPair data) override;
@@ -37,12 +37,13 @@ private:
 private:
   fs::path path_;
   std::ofstream f_;
-  boost::asio::strand<boost::asio::executor> strand_;
-  boost::asio::executor executor_;
+  boost::asio::strand<boost::asio::any_io_executor> strand_;
+  boost::asio::any_io_executor executor_;
 };
 
-Result<WALWriterImpl> NewWALWriter(boost::asio::executor executor);
+Result<WALWriterImpl> NewWALWriter(boost::asio::any_io_executor executor);
 
-Result<WALWriterImpl> LoadWALWriter(boost::asio::executor executor, fs::path path, int64_t seek);
+Result<WALWriterImpl> LoadWALWriter(boost::asio::any_io_executor executor, fs::path path,
+                                    int64_t seek);
 
 }  // namespace stewkk::db::logic::recovery

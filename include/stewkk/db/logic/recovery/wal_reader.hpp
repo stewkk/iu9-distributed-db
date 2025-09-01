@@ -35,6 +35,6 @@ void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage
 
 Result<std::tuple<storage::PersistentStorageCollection, storage::SwappableMemoryStorage,
                   SwappableWalWriterImpl>>
-InitializeStorages(boost::asio::executor executor, size_t threshold = 5000);
+InitializeStorages(boost::asio::any_io_executor executor, size_t threshold = 5000);
 
 }  // namespace stewkk::db::logic::recovery

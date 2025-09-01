@@ -4,7 +4,6 @@
 #include <stewkk/db/logic/storage/memstorage_impl.hpp>
 
 using ::testing::Eq;
-using ::testing::IsTrue;
 using ::testing::Optional;
 using ::testing::StrEq;
 

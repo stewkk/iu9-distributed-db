@@ -47,8 +47,8 @@ void RunServer(uint16_t port) {
     LOG(FATAL) << "failed to initialize storages: " << storages.assume_error().What();
   }
   auto [persistent, storage, wal_writer] = std::move(storages).assume_value();
-  stewkk::db::views::HandlersProxy handlers(
-      stewkk::db::logic::controllers::Controller{storage, wal_writer, persistent});
+  stewkk::db::views::HandlersProxy handlers(stewkk::db::logic::controllers::Controller{
+      storage, wal_writer, wal_writer, persistent, grpc_context.get_executor()});
   stewkk::db::views::RegisterHandlers(handlers, grpc_context, service);
 
   LOG(INFO) << "Server listening on " << server_address;
