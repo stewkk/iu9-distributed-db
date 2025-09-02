@@ -15,13 +15,13 @@ TEST(WALTest, WriteAndReadLogs) {
   boost::asio::thread_pool pool{1};
   fs::path path;
   {
-    auto writer = NewWALWriter(pool.get_executor()).value();
+    auto writer = NewSwappableWalWriter(pool.get_executor()).value();
     boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
       writer.Remove(yield, "blabla").value();
       writer.Insert(yield, KwPair{"a", "b"}).value();
+      path = writer.GetPath(yield);
     });
     pool.join();
-    path = writer.GetPath();
   }
 
   auto got = ReadWAL(path).value().first;
@@ -37,11 +37,11 @@ TEST(WALTest, Concurrent) {
 
   fs::path path;
   {
-    auto writer = NewWALWriter(pool.get_executor()).value();
-    path = writer.GetPath();
+    auto writer = NewSwappableWalWriter(pool.get_executor()).value();
+    boost::asio::spawn(
+        pool, [&writer, &path](boost::asio::yield_context yield) { path = writer.GetPath(yield); });
 
     for (int i = 0; i < 20; ++i) {
-      // NOTE: exception causes std::terminate here
       boost::asio::spawn(pool, [&writer](boost::asio::yield_context yield) {
         writer.Remove(yield, "blabla").value();
         writer.Insert(yield, KwPair{"a", "b"}).value();

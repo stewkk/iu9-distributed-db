@@ -29,7 +29,7 @@ void MapStorage::Insert(KwPair data) {
 
 void MapStorage::Clear() { map_.clear(); }
 
-size_t MapStorage::Size() const { return map_.size(); }
+size_t MapStorage::Size() { return map_.size(); }
 
 MapStorage::Map&& MapStorage::MoveUnderlying() { return std::move(map_); }
 

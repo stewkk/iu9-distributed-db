@@ -3,16 +3,8 @@
 #include <filesystem>
 #include <fstream>
 
-#include <folly/synchronization/HazptrObj.h>
-#include <boost/asio/executor.hpp>
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/spawn.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/asio/thread_pool.hpp>
-
 #include <wal.pb.h>
 
-#include <stewkk/db/logic/recovery/wal_writer.hpp>
 #include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/models/storage/kw_pair.hpp>
 
@@ -22,28 +14,20 @@ using models::storage::KwPair;
 using result::Result;
 namespace fs = std::filesystem;
 
-class WALWriterImpl : public WALWriter, public folly::hazptr_obj_base<WALWriterImpl> {
+class WALWriterImpl {
 public:
-  WALWriterImpl(boost::asio::any_io_executor context, fs::path path, std::ofstream&& stream);
+  WALWriterImpl(fs::path path, std::ofstream&& stream);
 
-  virtual Result<> Remove(const boost::asio::yield_context& yield, std::string key) override;
-  virtual Result<> Insert(const boost::asio::yield_context& yield, KwPair data) override;
-
+  Result<> WriteEntry(wal::Entry entry);
   fs::path GetPath() const;
-
-private:
-  Result<> WriteEntry(const boost::asio::yield_context& yield, wal::Entry entry);
 
 private:
   fs::path path_;
   std::ofstream f_;
-  boost::asio::strand<boost::asio::any_io_executor> strand_;
-  boost::asio::any_io_executor executor_;
 };
 
-Result<WALWriterImpl> NewWALWriter(boost::asio::any_io_executor executor);
+Result<WALWriterImpl> NewWALWriter();
 
-Result<WALWriterImpl> LoadWALWriter(boost::asio::any_io_executor executor, fs::path path,
-                                    int64_t seek);
+Result<WALWriterImpl> LoadWALWriter(fs::path path, int64_t seek);
 
 }  // namespace stewkk::db::logic::recovery

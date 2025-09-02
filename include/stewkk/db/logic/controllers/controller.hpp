@@ -32,7 +32,7 @@ public:
   virtual result::Result<> Clear() override;
 
 private:
-  void SwapToPersistentStorage();
+  void SwapToPersistentStorage(const boost::asio::yield_context& yield);
   void TriggerSwapToPersistentStorage();
 
 private:

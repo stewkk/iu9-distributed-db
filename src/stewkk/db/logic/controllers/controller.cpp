@@ -1,5 +1,7 @@
 #include <stewkk/db/logic/controllers/controller.hpp>
 
+#include <absl/log/log.h>
+
 namespace stewkk::db::logic::controllers {
 
 namespace {
@@ -27,13 +29,13 @@ void Controller::TriggerSwapToPersistentStorage() {
     return;
   }
   boost::asio::spawn(executor_, [&](boost::asio::yield_context yield) {
-    SwapToPersistentStorage();
+    SwapToPersistentStorage(yield);
     swap_job_guard_.Release();
   });
 }
 
-void Controller::SwapToPersistentStorage() {
-  auto remove_callback_opt = swappable_wal_writer_.Swap();
+void Controller::SwapToPersistentStorage(const boost::asio::yield_context& yield) {
+  auto remove_callback_opt = swappable_wal_writer_.Swap(yield);
   if (remove_callback_opt.has_failure()) {
     LOG(ERROR) << "SwapToPersistentStorage failed: " << remove_callback_opt.assume_error().What();
     return;

@@ -23,9 +23,9 @@ TEST(RecoveryTest, SearchForWALFiles) {
   boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
     writer.Remove(yield, "blabla").value();
     writer.Insert(yield, KwPair{"a", "b"}).value();
+    writer.Swap(yield).value();
   });
   pool.join();
-  writer.Swap().value();
 
   auto files = SearchWALFiles().value();
 
@@ -35,20 +35,23 @@ TEST(RecoveryTest, SearchForWALFiles) {
 TEST(RecoveryTest, MemstorageInitialization) {
   fs::remove_all(filesystem::GetDataDir());
   fs::create_directory(filesystem::GetDataDir());
-  boost::asio::thread_pool pool{1};
-  fs::path path;
-  auto writer = NewSwappableWalWriter(pool.get_executor()).value();
-  boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
-    writer.Insert(yield, KwPair{"a", "b"}).value();
-    writer.Insert(yield, KwPair{"c", "e"}).value();
-    writer.Swap().value();
-    writer.Insert(yield, KwPair{"c", "d"}).value();
-  });
-  pool.join();
+  {
+    boost::asio::thread_pool pool{1};
+    fs::path path;
+    auto writer = NewSwappableWalWriter(pool.get_executor()).value();
+    boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
+      writer.Insert(yield, KwPair{"a", "b"}).value();
+      writer.Insert(yield, KwPair{"c", "e"}).value();
+      writer.Swap(yield).value();
+      writer.Insert(yield, KwPair{"c", "d"}).value();
+    });
+    pool.join();
+  }
 
-  boost::asio::io_context ctx;
+  boost::asio::thread_pool pool{1};
   auto [persistent_collection, memstorage, wal_writer]
-      = InitializeStorages(ctx.get_executor(), 1).value();
+      = InitializeStorages(pool.get_executor(), 1).value();
+  pool.join();
 
   auto got1 = persistent_collection.Get("a").value().value;
   auto got2 = memstorage.Get("c").value().value();
@@ -67,7 +70,7 @@ TEST(RecoveryTest, WalWriterInitialization) {
     boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
       writer.Insert(yield, KwPair{"a", "b"}).value();
       writer.Insert(yield, KwPair{"c", "e"}).value();
-      writer.Swap().value();
+      writer.Swap(yield).value();
       writer.Insert(yield, KwPair{"c", "d"}).value();
     });
     pool.join();
@@ -79,9 +82,9 @@ TEST(RecoveryTest, WalWriterInitialization) {
     auto [_, _, wal_writer] = InitializeStorages(pool.get_executor(), 1).value();
     boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
       wal_writer.Insert(yield, KwPair{"f", "g"}).value();
+      path = wal_writer.GetPath(yield);
     });
     pool.join();
-    path = wal_writer.GetPath();
   }
 
   auto got = ReadWAL(path).value().first;

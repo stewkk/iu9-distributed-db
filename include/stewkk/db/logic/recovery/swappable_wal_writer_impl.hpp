@@ -11,23 +11,21 @@ namespace stewkk::db::logic::recovery {
 class SwappableWalWriterImpl : public WALWriter, public SwappableWalWriter {
 public:
   SwappableWalWriterImpl(WALWriterImpl* writer, boost::asio::any_io_executor);
-  SwappableWalWriterImpl(const SwappableWalWriterImpl& other) = delete;
-  SwappableWalWriterImpl(SwappableWalWriterImpl&& other);
-  SwappableWalWriterImpl& operator=(const SwappableWalWriterImpl& other) = delete;
-  SwappableWalWriterImpl& operator=(SwappableWalWriterImpl&& other);
 
   virtual Result<> Remove(const boost::asio::yield_context& yield, std::string key) override;
   virtual Result<> Insert(const boost::asio::yield_context& yield, KwPair data) override;
 
-  virtual Result<RemoveWalCallback> Swap() override;
+  virtual Result<RemoveWalCallback> Swap(const boost::asio::yield_context& yield) override;
 
-  fs::path GetPath() const;
-
-  virtual ~SwappableWalWriterImpl();
+  fs::path GetPath(const boost::asio::yield_context& yield) const;
 
 private:
-  std::atomic<WALWriterImpl*> writer_;
+  Result<> WriteEntry(const boost::asio::yield_context& yield, wal::Entry&& entry);
+
+private:
+  std::unique_ptr<WALWriterImpl> writer_;
   boost::asio::any_io_executor executor_;
+  boost::asio::strand<boost::asio::any_io_executor> strand_;
 };
 
 result::Result<SwappableWalWriterImpl> NewSwappableWalWriter(boost::asio::any_io_executor executor);

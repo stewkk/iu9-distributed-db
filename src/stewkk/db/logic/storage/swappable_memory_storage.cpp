@@ -1,17 +1,21 @@
 #include <stewkk/db/logic/storage/swappable_memstorage.hpp>
 
-#include <folly/synchronization/Hazptr.h>
-
 namespace stewkk::db::logic::storage {
 
-SwappableMemoryStorage::SwappableMemoryStorage() : storage_ptr_(new MapStorage) {}
+SwappableMemoryStorage::SwappableMemoryStorage()
+    : storage_ptr_(new MapStorage), operations_running_(0) {}
 
-SwappableMemoryStorage::SwappableMemoryStorage(MapStorage* other) : storage_ptr_(other) {}
+SwappableMemoryStorage::SwappableMemoryStorage(MapStorage* other)
+    : storage_ptr_(other), operations_running_(0) {}
 
 SwappableMemoryStorage::~SwappableMemoryStorage() {
-  auto ptr = storage_ptr_.exchange(nullptr);
+  auto ptr = storage_ptr_.load();
   if (ptr != nullptr) {
-    ptr->retire();
+    // TODO: вынести в метод
+    while (operations_running_.load()) {
+      __builtin_ia32_pause();
+    }
+    delete ptr;
   }
 }
 
@@ -19,49 +23,52 @@ SwappableMemoryStorage::SwappableMemoryStorage(SwappableMemoryStorage&& other)
     : storage_ptr_(other.storage_ptr_.exchange(nullptr)) {}
 
 SwappableMemoryStorage& SwappableMemoryStorage::operator=(SwappableMemoryStorage&& other) {
-  auto current = storage_ptr_.exchange(nullptr);
+  auto current = storage_ptr_.load();
   if (current != nullptr) {
-    current->retire();
+    delete current;
   }
   storage_ptr_ = other.storage_ptr_.exchange(nullptr);
   return *this;
 }
 
 Result<std::optional<std::string>> SwappableMemoryStorage::Get(std::string key) {
-  folly::hazptr_holder h = folly::make_hazard_pointer();
-  MapStorage* ptr = h.protect(storage_ptr_);
+  auto ptr = storage_ptr_.load();
   return ptr->Get(std::move(key));
 }
 
 void SwappableMemoryStorage::Remove(std::string key) {
-  folly::hazptr_holder h = folly::make_hazard_pointer();
-  MapStorage* ptr = h.protect(storage_ptr_);
-  return ptr->Remove(std::move(key));
+  ++operations_running_;
+  storage_ptr_.load()->Remove(std::move(key));
+  --operations_running_;
 }
 
 void SwappableMemoryStorage::Insert(KwPair data) {
-  folly::hazptr_holder h = folly::make_hazard_pointer();
-  MapStorage* ptr = h.protect(storage_ptr_);
-  return ptr->Insert(std::move(data));
+  ++operations_running_;
+  storage_ptr_.load()->Insert(std::move(data));
+  --operations_running_;
 }
 
 void SwappableMemoryStorage::Clear() {
-  folly::hazptr_holder h = folly::make_hazard_pointer();
-  MapStorage* ptr = h.protect(storage_ptr_);
-  ptr->Clear();
+  ++operations_running_;
+  storage_ptr_.load()->Clear();
+  --operations_running_;
 }
 
-size_t SwappableMemoryStorage::Size() const {
-  folly::hazptr_holder h = folly::make_hazard_pointer();
-  MapStorage* ptr = h.protect(storage_ptr_);
-  return ptr->Size();
+size_t SwappableMemoryStorage::Size() {
+  ++operations_running_;
+  auto res = storage_ptr_.load()->Size();
+  --operations_running_;
+  return res;
 }
 
 std::vector<StorageEntry> SwappableMemoryStorage::Collect() {
   auto new_storage = new MapStorage;
   auto current_storage = storage_ptr_.exchange(new_storage);
+  while (operations_running_.load()) {
+    __builtin_ia32_pause();
+  }
   auto res = current_storage->Collect();
-  current_storage->retire();
+  delete current_storage;
   return res;
 }
 

@@ -75,7 +75,6 @@ target_link_libraries(persistent_proto
   absl::check
   ${_REFLECTION}
   ${_PROTOBUF_LIBPROTOBUF})
-
 add_library(libdb
   logic/storage/inmemory.cpp
   logic/storage/persistent.cpp

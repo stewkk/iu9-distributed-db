@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include <folly/synchronization/HazptrObj.h>
 #include <boost/unordered/concurrent_flat_map.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 
@@ -16,9 +15,7 @@ namespace stewkk::db::logic::storage {
 using models::storage::KwPair;
 using result::Result;
 
-class MapStorage : public KwStorage,
-                   public CollectableStorage,
-                   public folly::hazptr_obj_base<MapStorage> {
+class MapStorage : public KwStorage, public CollectableStorage {
 private:
   using Map = boost::concurrent_flat_map<std::string, std::optional<std::string>>;
 
@@ -30,7 +27,7 @@ public:
   virtual void Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
   virtual void Clear() override;
-  virtual size_t Size() const override;
+  virtual size_t Size() override;
 
   virtual std::vector<StorageEntry> Collect() override;
 

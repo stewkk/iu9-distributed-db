@@ -26,6 +26,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.gdb
     pkgs.libiberty
     pkgs.killall
+    pkgs.valgrind
 
     # keep this line if you use bash
     pkgs.bashInteractive
