@@ -24,7 +24,6 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.plantuml
     pkgs.systemd
     pkgs.gdb
-    pkgs.libiberty
     pkgs.killall
     pkgs.valgrind
 

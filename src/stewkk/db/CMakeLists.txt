@@ -1,7 +1,6 @@
 include(FetchGRPC)
 include(FetchBoost)
 include(FetchAsioGrpc)
-include(FetchFolly)
 
 get_filename_component(api_proto "api.proto" ABSOLUTE)
 get_filename_component(api_proto_path "${api_proto}" PATH)
@@ -122,7 +121,6 @@ target_link_libraries(libdb
   absl::log
   absl::log_initialize
   asio-grpc::asio-grpc
-  folly_target
   ${_REFLECTION}
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF}
