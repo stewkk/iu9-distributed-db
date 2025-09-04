@@ -51,9 +51,12 @@ TEST(RecoveryTest, MemstorageInitialization) {
   boost::asio::thread_pool pool{1};
   auto [persistent_collection, memstorage, wal_writer]
       = InitializeStorages(pool.get_executor(), 1).value();
-  pool.join();
 
-  auto got1 = persistent_collection.Get("a").value().value;
+  std::optional<std::string> got1;
+  boost::asio::spawn(pool, [&](const boost::asio::yield_context yield) {
+    got1 = persistent_collection.Get("a", yield).value().value;
+  });
+  pool.join();
   auto got2 = memstorage.Get("c").value().value();
 
   ASSERT_THAT(got1, Eq("b"));

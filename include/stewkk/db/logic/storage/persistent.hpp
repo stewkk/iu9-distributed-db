@@ -19,7 +19,9 @@ namespace fs = std::filesystem;
 
 class PersistentStorage {
 public:
-  PersistentStorage(fs::path path, int fd, std::vector<uint64_t> index);
+  using Index = std::vector<uint64_t>;
+
+  PersistentStorage(fs::path path, int fd, Index index);
   ~PersistentStorage();
   PersistentStorage(const PersistentStorage& other) = delete;
   PersistentStorage(PersistentStorage&& other);
@@ -27,16 +29,33 @@ public:
   PersistentStorage& operator=(PersistentStorage&& other);
 
   Result<StorageEntry> Get(std::string_view key);
+  Result<StorageEntry> ReadEntryAt(uint64_t offset) const;
   fs::path Path() const;
 
-private:
-  Result<StorageEntry> ReadEntryAt(uint64_t offset);
+  struct Iterator {
+    using difference_type = std::ptrdiff_t;
+    using value_type = Result<StorageEntry>;
+
+    value_type operator*() const;
+
+    Iterator& operator++();
+    Iterator operator++(int);
+
+    bool operator==(const Iterator& other) const = default;
+
+    const PersistentStorage* storage;
+    PersistentStorage::Index::const_iterator index_iterator;
+  };
+  static_assert(std::input_iterator<Iterator>);
+
+  Iterator begin() const;
+  Iterator end() const;
 
 private:
   fs::path path_;
   int fd_;
 
-  std::vector<uint64_t> index_;
+  Index index_;
 };
 
 Result<PersistentStorage> NewPersistentStorage(std::vector<StorageEntry> data);

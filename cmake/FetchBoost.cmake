@@ -9,6 +9,6 @@ FetchContent_Declare(
   OVERRIDE_FIND_PACKAGE
 )
 
-set(BOOST_INCLUDE_LIBRARIES outcome uuid unordered asio thread context filesystem program_options regex system preprocessor)
+set(BOOST_INCLUDE_LIBRARIES outcome uuid unordered asio thread scope_exit)
 
 FetchContent_MakeAvailable(Boost)

@@ -99,7 +99,7 @@ void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage
 Result<std::tuple<storage::PersistentStorageCollection, storage::SwappableMemoryStorage,
                   SwappableWalWriterImpl>>
 InitializeStorages(boost::asio::any_io_executor executor, size_t threshold) {
-  storage::PersistentStorageCollection persistent_collection;
+  storage::PersistentStorageCollection persistent_collection(executor);
   storage::SwappableMemoryStorage memstorage;
   std::optional<SwappableWalWriterImpl> wal_writer = std::nullopt;
   auto files_opt = SearchWALFiles();

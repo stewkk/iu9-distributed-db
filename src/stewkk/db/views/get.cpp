@@ -6,7 +6,7 @@ using logic::controllers::KeyDTO;
 
 void GetHandler(GetController& controller, GetRPC& rpc, GetRPC::Request& request,
                 const boost::asio::yield_context& yield) {
-  auto got = controller.Get(KeyDTO{request.key()});
+  auto got = controller.Get(yield, KeyDTO{request.key()});
   if (got.has_failure()) {
     auto& error = got.assume_error();
     if (error.Wraps(logic::result::ErrorType::kNotFound)) {

@@ -77,6 +77,7 @@ target_link_libraries(persistent_proto
 add_library(libdb
   logic/storage/inmemory.cpp
   logic/storage/persistent.cpp
+  logic/storage/compaction.cpp
   logic/storage/persistent_storage_collection.cpp
   logic/storage/swappable_memory_storage.cpp
   logic/filesystem/filesystem.cpp
@@ -118,6 +119,7 @@ target_link_libraries(libdb
   Boost::unordered
   Boost::asio
   Boost::thread
+  Boost::scope_exit
   absl::log
   absl::log_initialize
   asio-grpc::asio-grpc

@@ -2,6 +2,8 @@
 
 #include <absl/log/log.h>
 
+#include <stewkk/db/logic/storage/compaction.hpp>
+
 namespace stewkk::db::logic::controllers {
 
 namespace {
@@ -57,6 +59,8 @@ void Controller::SwapToPersistentStorage(const boost::asio::yield_context& yield
   }
 
   remove_callback();
+
+  storage::RunCompaction(persistent_storage_, yield);
 }
 
 }  // namespace stewkk::db::logic::controllers

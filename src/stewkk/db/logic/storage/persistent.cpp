@@ -144,7 +144,7 @@ PersistentStorage& PersistentStorage::operator=(PersistentStorage&& other) {
   return *this;
 }
 
-Result<StorageEntry> PersistentStorage::ReadEntryAt(uint64_t offset) {
+Result<StorageEntry> PersistentStorage::ReadEntryAt(uint64_t offset) const {
   lseek(fd_, offset, SEEK_SET);
   google::protobuf::io::FileInputStream stream(fd_);
   persistent::Entry entry;
@@ -158,6 +158,31 @@ Result<StorageEntry> PersistentStorage::ReadEntryAt(uint64_t offset) {
     res.value = entry.value();
   }
   return res;
+}
+
+PersistentStorage::Iterator PersistentStorage::begin() const {
+  return Iterator{this, index_.cbegin()};
+}
+PersistentStorage::Iterator PersistentStorage::end() const { return Iterator{this, index_.cend()}; }
+
+PersistentStorage::Iterator::value_type PersistentStorage::Iterator::operator*() const {
+  auto entry_opt = storage->ReadEntryAt(*index_iterator);
+  if (entry_opt.has_failure()) {
+    return entry_opt.assume_error();
+  }
+
+  return std::move(entry_opt).assume_value();
+}
+
+PersistentStorage::Iterator& PersistentStorage::Iterator::operator++() {
+  ++index_iterator;
+  return *this;
+}
+
+PersistentStorage::Iterator PersistentStorage::Iterator::operator++(int) {
+  auto tmp = *this;
+  ++index_iterator;
+  return tmp;
 }
 
 }  // namespace stewkk::db::logic::storage
