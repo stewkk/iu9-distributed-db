@@ -1,5 +1,4 @@
 pygments
-pytest
 grpcio
 grpcio-tools
 protoletariat

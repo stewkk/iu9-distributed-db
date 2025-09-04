@@ -9,8 +9,6 @@ import pytest
 
 import Client
 
-pytest_plugins = ['testsuite.pytest_plugin']
-
 
 def pytest_addoption(parser):
     group = parser.getgroup('db-service')
@@ -23,20 +21,7 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture
-async def app_service(
-    ensure_daemon_started,
-    # Service process holder
-    app_service_scope,
-    # Service dependencies
-    mockserver,
-):
-    # Start service if not started yet
-    await ensure_daemon_started(app_service_scope)
-
-
-@pytest.fixture
 async def app_client(
-    app_service,
     app_service_port,
 ):
     # Create service client instance

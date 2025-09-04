@@ -3,7 +3,7 @@
 import grpc
 
 
-async def test_get(app_client):
+def test_get(app_client):
     app_client.Insert("oaoa", "yaya")
 
     response = app_client.Get("oaoa")
@@ -11,13 +11,13 @@ async def test_get(app_client):
     assert response == "yaya"
 
 
-async def test_not_found(app_client):
+def test_not_found(app_client):
     response = app_client.Get("oaoa")
 
     assert response == (grpc.StatusCode.NOT_FOUND, 'key oaoa not found')
 
 
-async def test_remove(app_client):
+def test_remove(app_client):
     app_client.Insert("oaoa", "yaya")
     app_client.Remove("oaoa")
 
@@ -26,7 +26,7 @@ async def test_remove(app_client):
     assert response[0] == grpc.StatusCode.NOT_FOUND
 
 
-async def test_remove_non_existing(app_client):
+def test_remove_non_existing(app_client):
     response = app_client.Remove("oaoa")
 
     assert response is None
