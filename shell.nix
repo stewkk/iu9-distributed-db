@@ -26,6 +26,9 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.gdb
     pkgs.killall
     pkgs.valgrind
+    pkgs.clojure
+    pkgs.clojure-lsp
+    pkgs.leiningen
 
     # keep this line if you use bash
     pkgs.bashInteractive
@@ -64,5 +67,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     fi
 
     python --version
+    resolvectl dns wlp0s20f3 10.0.100.1
+    resolvectl domain wlp0s20f3 ~incus
   '';
 }

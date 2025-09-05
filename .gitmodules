@@ -1,0 +1,4 @@
+[submodule "jepsen"]
+	path = jepsen
+	url = git@github.com:stewkk/jepsen.git
+	branch = iu9-distibuted-db
