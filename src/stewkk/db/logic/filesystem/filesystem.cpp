@@ -19,7 +19,7 @@ namespace {
 static constexpr std::string_view kVersion = "v1";
 static constexpr std::string_view kPathFormat = "{}/{}-{}.{}";
 
-static std::string_view kDir = "/tmp/iu9-distributed-db";
+static std::string kDir = "/tmp/iu9-distributed-db";
 
 }  // namespace
 
@@ -27,6 +27,7 @@ Result<std::ofstream> CreateBinaryFile(fs::path path, std::ifstream::openmode mo
   try {
     std::ofstream res;
     auto cur = res.exceptions();
+    // TODO: simplify
     res.exceptions(~std::ofstream::goodbit);
     res.open(path, mode | std::ofstream::binary);
     res.exceptions(cur);
@@ -58,7 +59,7 @@ Result<std::int32_t> OpenBinaryFD(fs::path path) {
 }
 
 fs::path GetPath(std::string_view extension) {
-  return std::format(kPathFormat, kDir, kVersion,
+  return std::format(kPathFormat, GetDataDir().string(), kVersion,
                      boost::uuids::to_string(boost::uuids::random_generator()()), extension);
 }
 
