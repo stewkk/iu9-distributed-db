@@ -19,7 +19,7 @@ namespace {
 static constexpr std::string_view kVersion = "v1";
 static constexpr std::string_view kPathFormat = "{}/{}-{}.{}";
 
-static constexpr std::string_view kDir = "/tmp/iu9-distributed-db";
+static std::string_view kDir = "/tmp/iu9-distributed-db";
 
 }  // namespace
 
@@ -63,5 +63,7 @@ fs::path GetPath(std::string_view extension) {
 }
 
 fs::path GetDataDir() { return kDir; }
+
+void SetDataDir(fs::path path) { kDir = path.string(); }
 
 }  // namespace stewkk::db::logic::filesystem

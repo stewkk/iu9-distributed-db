@@ -30,6 +30,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.clojure-lsp
     pkgs.leiningen
     pkgs.gnuplot
+    pkgs.patchelf
 
     # keep this line if you use bash
     pkgs.bashInteractive

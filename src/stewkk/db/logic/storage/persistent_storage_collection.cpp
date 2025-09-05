@@ -11,9 +11,10 @@ namespace stewkk::db::logic::storage {
 
 namespace {
 
-constexpr static std::string_view kMetadata = "/tmp/iu9-distributed-db/persistent.metadata";
+constexpr static std::string_view kMetadata = "persistent.metadata";
 
-Result<persistent::Metadata> ReadMetadata(fs::path path = kMetadata) {
+Result<persistent::Metadata> ReadMetadata(fs::path filename = kMetadata) {
+  auto path = filesystem::GetDataDir() / filename;
   auto f_opt = filesystem::OpenBinaryFile(path);
   if (f_opt.has_failure()) {
     return result::MakeError("failed to open metadata file");
@@ -29,7 +30,7 @@ Result<persistent::Metadata> ReadMetadata(fs::path path = kMetadata) {
   return metadata;
 }
 
-Result<> AppendMetadata(const PersistentStorage& storage, fs::path path = kMetadata) {
+Result<> AppendMetadata(const PersistentStorage& storage, fs::path filename = kMetadata) {
   persistent::Metadata metadata{};
 
   auto metadata_opt = ReadMetadata();
@@ -37,6 +38,7 @@ Result<> AppendMetadata(const PersistentStorage& storage, fs::path path = kMetad
     metadata = metadata_opt.assume_value();
   }
 
+  auto path = filesystem::GetDataDir() / filename;
   auto f_opt = filesystem::CreateBinaryFile(path, std::ofstream::trunc);
   if (f_opt.has_failure()) {
     return result::WrapError(std::move(f_opt), "failed to open metadata file");
@@ -118,7 +120,7 @@ const std::vector<PersistentStorage>& PersistentStorageCollection::GetCollection
 
 Result<> PersistentStorageCollection::SwapWith(PersistentStorage&& storage,
                                                const boost::asio::yield_context& yield) {
-  fs::path new_path = kMetadata;
+  fs::path new_path = filesystem::GetDataDir() / kMetadata;
   new_path.concat(".new");
 
   std::error_code ec;
@@ -129,7 +131,8 @@ Result<> PersistentStorageCollection::SwapWith(PersistentStorage&& storage,
     return err;
   }
 
-  fs::rename(new_path, kMetadata);
+  fs::path main_path = filesystem::GetDataDir() / kMetadata;
+  fs::rename(new_path, main_path);
 
   std::vector<fs::path> to_delete;
   to_delete.reserve(collection_.size());

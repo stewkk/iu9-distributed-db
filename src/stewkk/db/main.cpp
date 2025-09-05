@@ -14,9 +14,11 @@
 #include <absl/flags/parse.h>
 #include <absl/log/initialize.h>
 #include <absl/log/log.h>
+#include <absl/log/log_sink_registry.h>
 
 #include <api.grpc.pb.h>
 
+#include <stewkk/db/logic/log/file_log_sink.hpp>
 #include <stewkk/db/logic/recovery/swappable_wal_writer_impl.hpp>
 #include <stewkk/db/logic/recovery/wal_reader.hpp>
 #include <stewkk/db/logic/storage/persistent_collection.hpp>
@@ -24,6 +26,8 @@
 #include <stewkk/db/views/register_handlers.hpp>
 
 ABSL_FLAG(uint16_t, port, 50051, "Server port for the db");
+ABSL_FLAG(std::string, logfile, "", "Where to write logs. Default is stderr");
+ABSL_FLAG(std::string, datadir, "/tmp/iu9-distributed-db", "Data directory");
 
 void RunServer(uint16_t port) {
   auto server_address = std::format("0.0.0.0:{}", port);
@@ -60,6 +64,11 @@ void RunServer(uint16_t port) {
 int main(int argc, char** argv) {
   absl::ParseCommandLine(argc, argv);
   absl::InitializeLog();
+  if (!FLAGS_logfile.CurrentValue().empty()) {
+    auto sink = stewkk::db::logic::log::FileLogSink::New(FLAGS_logfile.CurrentValue()).value();
+    absl::AddLogSink(sink.get());
+  }
+  stewkk::db::logic::filesystem::SetDataDir(FLAGS_datadir.CurrentValue());
   RunServer(absl::GetFlag(FLAGS_port));
   return 0;
 }

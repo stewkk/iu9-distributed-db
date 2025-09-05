@@ -92,6 +92,7 @@ add_library(libdb
   logic/controllers/clear.cpp
   logic/controllers/controller.cpp
   logic/synchronization/job_guard.cpp
+  logic/log/file_log_sink.cpp
   views/register_handlers.cpp
   views/handlers_proxy.cpp
   views/insert.cpp
