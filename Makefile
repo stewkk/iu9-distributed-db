@@ -12,9 +12,13 @@ build:
 
 codegen:
 	protol --create-package --in-place --python-out ./pytests/codegen/ protoc --proto-path=./src/stewkk/db/ --plugin=protoc-gen-grpc_python=./build/bin/grpc_python_plugin --python_out=./pytests/codegen/ --pyi_out=./pytests/codegen/ --grpc_python_out=./pytests/codegen/ src/stewkk/db/api.proto
+	./scripts/codegen-java-client.sh
 
 testsuite:
 	echo "not implemented"
 	# PYTHONPATH=./pytests pytest -vvv pytests/ --app-service-port 50051
 
-.PHONY: codegen test build
+jepsen:
+	make --directory jepsen/iu9-distributed-db
+
+.PHONY: codegen test build jepsen

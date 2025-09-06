@@ -20,7 +20,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.cmake
     pkgs.pre-commit
     pythonWithPytest
-    pkgs.nodePackages.pyright
+    pkgs.pyright
     pkgs.plantuml
     pkgs.systemd
     pkgs.gdb
@@ -31,6 +31,8 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.leiningen
     pkgs.gnuplot
     pkgs.patchelf
+    pkgs.openjdk17
+    pkgs.protoc-gen-grpc-java
 
     # keep this line if you use bash
     pkgs.bashInteractive
