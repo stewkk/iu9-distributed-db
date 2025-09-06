@@ -30,9 +30,14 @@ Result<PersistentStorage> MergeData(PersistentStorageCollection& collection) {
   auto comparator = [](const IteratorPair& lhs, const IteratorPair& rhs) {
     auto lhs_opt = *(lhs.first);
     auto rhs_opt = *(rhs.first);
-    if (lhs_opt.has_failure() || rhs_opt.has_failure()) {
+    if (lhs_opt.has_failure()) {
       LOG(ERROR) << "error while merging data from persistent storages: "
                  << lhs_opt.assume_error().What();
+      return false;
+    }
+    if (rhs_opt.has_failure()) {
+      LOG(ERROR) << "error while merging data from persistent storages: "
+                 << rhs_opt.assume_error().What();
       return false;
     }
     auto lhs_value = std::move(lhs_opt).assume_value();

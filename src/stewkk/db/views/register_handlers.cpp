@@ -7,7 +7,7 @@
 namespace stewkk::db::views {
 
 void RegisterHandlers(HandlersProxy& handlers, agrpc::GrpcContext& grpc_context,
-                      Db::AsyncService& service) {
+                      iu9db::Db::AsyncService& service) {
   using namespace std::placeholders;
 
   agrpc::register_yield_rpc_handler<InsertRPC>(

@@ -9,6 +9,6 @@
 namespace stewkk::db::views {
 
 void RegisterHandlers(HandlersProxy& handlers, agrpc::GrpcContext& grpc_context,
-                      Db::AsyncService& service);
+                      iu9db::Db::AsyncService& service);
 
 }  // namespace stewkk::db::views

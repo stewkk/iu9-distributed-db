@@ -8,7 +8,7 @@ namespace stewkk::db::logic::controllers {
 
 namespace {
 
-constexpr static size_t kThreshold = 5000;
+constexpr static size_t kThreshold = 5;
 
 }  // namespace
 

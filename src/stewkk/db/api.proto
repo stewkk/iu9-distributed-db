@@ -1,3 +1,5 @@
+package iu9db;
+
 service Db {
   rpc Insert (KeyValueRequest) returns (EmptyReply) {}
   rpc Remove (KeyRequest)      returns (EmptyReply) {}

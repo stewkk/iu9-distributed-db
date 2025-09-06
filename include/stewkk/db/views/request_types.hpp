@@ -6,9 +6,9 @@
 
 namespace stewkk::db::views {
 
-using RemoveRPC = agrpc::ServerRPC<&Db::AsyncService::RequestRemove>;
-using InsertRPC = agrpc::ServerRPC<&Db::AsyncService::RequestInsert>;
-using GetRPC = agrpc::ServerRPC<&Db::AsyncService::RequestGet>;
-using ClearRPC = agrpc::ServerRPC<&Db::AsyncService::RequestClear>;
+using RemoveRPC = agrpc::ServerRPC<&iu9db::Db::AsyncService::RequestRemove>;
+using InsertRPC = agrpc::ServerRPC<&iu9db::Db::AsyncService::RequestInsert>;
+using GetRPC = agrpc::ServerRPC<&iu9db::Db::AsyncService::RequestGet>;
+using ClearRPC = agrpc::ServerRPC<&iu9db::Db::AsyncService::RequestClear>;
 
 }  // namespace stewkk::db::views
