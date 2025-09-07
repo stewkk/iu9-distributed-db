@@ -89,7 +89,6 @@ add_library(libdb
   logic/controllers/insert.cpp
   logic/controllers/remove.cpp
   logic/controllers/get.cpp
-  logic/controllers/clear.cpp
   logic/controllers/controller.cpp
   logic/synchronization/job_guard.cpp
   logic/log/file_log_sink.cpp
@@ -98,7 +97,6 @@ add_library(libdb
   views/insert.cpp
   views/remove.cpp
   views/get.cpp
-  views/clear.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
 target_compile_features(libdb PUBLIC cxx_std_20)

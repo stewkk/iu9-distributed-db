@@ -3,7 +3,6 @@
 #include <boost/asio/executor.hpp>
 #include <boost/thread/thread.hpp>
 
-#include <stewkk/db/logic/controllers/clear.hpp>
 #include <stewkk/db/logic/controllers/get.hpp>
 #include <stewkk/db/logic/controllers/insert.hpp>
 #include <stewkk/db/logic/controllers/remove.hpp>
@@ -16,10 +15,7 @@
 
 namespace stewkk::db::logic::controllers {
 
-class Controller : public GetController,
-                   public InsertController,
-                   public RemoveController,
-                   public ClearController {
+class Controller : public GetController, public InsertController, public RemoveController {
 public:
   Controller(storage::SwappableMemoryStorage& storage, recovery::WALWriter& wal_writer,
              recovery::SwappableWalWriter& swappable_wal_writer,
@@ -30,7 +26,6 @@ public:
   virtual result::Result<> Remove(const boost::asio::yield_context& yield, KeyDTO data) override;
   virtual result::Result<ValueDTO> Get(const boost::asio::yield_context& yield,
                                        KeyDTO data) override;
-  virtual result::Result<> Clear() override;
 
 private:
   void SwapToPersistentStorage(const boost::asio::yield_context& yield);

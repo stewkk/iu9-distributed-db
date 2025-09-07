@@ -4,7 +4,6 @@ service Db {
   rpc Insert (KeyValueRequest) returns (EmptyReply) {}
   rpc Remove (KeyRequest)      returns (EmptyReply) {}
   rpc Get    (KeyRequest)      returns (GetReply)   {}
-  rpc Clear  (EmptyRequest)    returns (EmptyReply) {}
 }
 
 message KeyValueRequest {

@@ -15,7 +15,7 @@ namespace stewkk::db::logic::storage {
 using models::storage::KwPair;
 using result::Result;
 
-class MapStorage : public KwStorage, public CollectableStorage {
+class MapStorage : public KwStorage {
 private:
   using Map = boost::concurrent_flat_map<std::string, std::optional<std::string>>;
 
@@ -26,44 +26,15 @@ public:
   virtual Result<std::optional<std::string>> Get(std::string key) override;
   virtual void Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
-  virtual void Clear() override;
   virtual size_t Size() override;
 
-  virtual std::vector<StorageEntry> Collect() override;
-
-  Map&& MoveUnderlying();
+  const Map& GetUnderlying() const;
 
 private:
   Map map_;
 };
 
-class ReadonlyMemoryStorage {
-private:
-  using Map = boost::unordered::unordered_flat_map<std::string, std::optional<std::string>>;
-
-public:
-  ReadonlyMemoryStorage(MapStorage&& storage);
-
-  struct Iterator {
-    using difference_type = std::ptrdiff_t;
-    using value_type = StorageEntry;
-
-    value_type operator*() const;
-
-    Iterator& operator++();
-    Iterator operator++(int);
-
-    bool operator==(const Iterator& other) const = default;
-
-    Map::const_iterator map_iterator_;
-  };
-  static_assert(std::input_iterator<Iterator>);
-
-  Iterator begin() const;
-  Iterator end() const;
-
-private:
-  Map map_;
-};
+std::vector<StorageEntry> ToEntries(
+    boost::unordered_flat_map<std::string, std::optional<std::string>> map);
 
 }  // namespace stewkk::db::logic::storage

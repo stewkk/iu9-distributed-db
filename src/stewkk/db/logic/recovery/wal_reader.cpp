@@ -119,8 +119,9 @@ InitializeStorages(boost::asio::any_io_executor executor, size_t threshold) {
     storage::MapStorage storage;
     Apply(operations, storage);
     if (storage.Size() > threshold) {
-      auto persistent_opt
-          = storage::NewPersistentStorage(storage::ReadonlyMemoryStorage(std::move(storage)));
+      // TODO: MoveUnderlying() ?
+      auto data = storage.GetUnderlying();
+      auto persistent_opt = storage::NewPersistentStorage(storage::ToEntries(std::move(data)));
       if (persistent_opt.has_failure()) {
         return result::WrapError(std::move(persistent_opt),
                                  "failed to initialize persistent storage");

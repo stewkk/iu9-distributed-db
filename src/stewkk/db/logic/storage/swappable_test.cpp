@@ -37,26 +37,4 @@ TEST(SwappableStorageTest, Collect) {
                    }));
 }
 
-TEST(SwappableStorageTest, GetAfterCollect) {
-  SwappableMemoryStorage storage;
-  KwPair data{.key = "key", .value = "value"};
-  storage.Insert(data);
-  auto _ = storage.Collect();
-
-  auto got = storage.Get("key");
-
-  ASSERT_THAT(got.has_failure(), true);
-}
-
-TEST(SwappableStorageTest, InsertAfterCollect) {
-  SwappableMemoryStorage storage;
-  storage.Insert(KwPair{.key = "key0", .value = "value0"});
-  auto _ = storage.Collect();
-  storage.Insert(KwPair{.key = "key1", .value = "value1"});
-
-  auto got = storage.Get("key1").value();
-
-  ASSERT_THAT(got, Optional(std::string{"value1"}));
-}
-
 }  // namespace stewkk::db::logic::storage

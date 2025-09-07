@@ -11,7 +11,7 @@ build:
 	cp ./build/bin/iu9-db-fixed ./jepsen/iu9-distributed-db/resources/iu9-db
 
 codegen:
-	protol --create-package --in-place --python-out ./pytests/codegen/ protoc --proto-path=./src/stewkk/db/ --plugin=protoc-gen-grpc_python=./build/bin/grpc_python_plugin --python_out=./pytests/codegen/ --pyi_out=./pytests/codegen/ --grpc_python_out=./pytests/codegen/ src/stewkk/db/api.proto
+	protol --create-package --in-place --python-out ./src/stewkk/client/codegen/ protoc --proto-path=./src/stewkk/db/ --plugin=protoc-gen-grpc_python=./build/bin/grpc_python_plugin --python_out=./src/stewkk/client/codegen/ --pyi_out=./src/stewkk/client/codegen/ --grpc_python_out=./src/stewkk/client/codegen/ src/stewkk/db/api.proto
 	./scripts/codegen-java-client.sh
 
 testsuite:

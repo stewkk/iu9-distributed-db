@@ -20,6 +20,7 @@ struct StorageEntry {
 class CollectableStorage {
 public:
   virtual std::vector<StorageEntry> Collect() = 0;
+  virtual void RemoveCollected() = 0;
 
   virtual ~CollectableStorage() = default;
 };

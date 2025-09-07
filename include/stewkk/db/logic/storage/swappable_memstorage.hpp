@@ -7,6 +7,7 @@
 #include <stewkk/db/logic/storage/collectable_memstorage.hpp>
 #include <stewkk/db/logic/storage/memstorage.hpp>
 #include <stewkk/db/logic/storage/memstorage_impl.hpp>
+#include <stewkk/db/logic/synchronization/operations_guard.hpp>
 
 namespace stewkk::db::logic::storage {
 
@@ -24,14 +25,15 @@ public:
   virtual Result<std::optional<std::string>> Get(std::string key) override;
   virtual void Remove(std::string key) override;
   virtual void Insert(KwPair data) override;
-  virtual void Clear() override;
   virtual size_t Size() override;
 
   virtual std::vector<StorageEntry> Collect() override;
+  virtual void RemoveCollected() override;
 
 private:
-  std::atomic<MapStorage*> storage_ptr_;
-  std::atomic<unsigned> operations_running_;
+  std::atomic<synchronization::OwningReferenceCounter<MapStorage>*> reader_first_;
+  std::atomic<synchronization::OwningReferenceCounter<MapStorage>*> reader_second_;
+  std::atomic<synchronization::ReferenceCounter<MapStorage>*> writer_;
 };
 
 }  // namespace stewkk::db::logic::storage

@@ -27,39 +27,18 @@ void MapStorage::Insert(KwPair data) {
   map_.insert_or_assign(std::move(data.key), std::move(data.value));
 }
 
-void MapStorage::Clear() { map_.clear(); }
-
 size_t MapStorage::Size() { return map_.size(); }
 
-MapStorage::Map&& MapStorage::MoveUnderlying() { return std::move(map_); }
+const MapStorage::Map& MapStorage::GetUnderlying() const { return map_; }
 
-std::vector<StorageEntry> MapStorage::Collect() {
-  auto readonly = ReadonlyMemoryStorage(std::move(*this));
-  map_ = Map();
-  return {readonly.begin(), readonly.end()};
-}
-
-ReadonlyMemoryStorage::ReadonlyMemoryStorage(MapStorage&& storage)
-    : map_(std::move(storage).MoveUnderlying()) {}
-
-ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::begin() const {
-  return Iterator{map_.cbegin()};
-}
-ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::end() const { return Iterator{map_.cend()}; }
-
-ReadonlyMemoryStorage::Iterator::value_type ReadonlyMemoryStorage::Iterator::operator*() const {
-  return StorageEntry{map_iterator_->first, map_iterator_->second};
-}
-
-ReadonlyMemoryStorage::Iterator& ReadonlyMemoryStorage::Iterator::operator++() {
-  ++map_iterator_;
-  return *this;
-}
-
-ReadonlyMemoryStorage::Iterator ReadonlyMemoryStorage::Iterator::operator++(int) {
-  auto tmp = *this;
-  ++map_iterator_;
-  return tmp;
+std::vector<StorageEntry> ToEntries(
+    boost::unordered_flat_map<std::string, std::optional<std::string>> map) {
+  std::vector<StorageEntry> res;
+  res.reserve(map.size());
+  for (const auto& entry : map) {
+    res.emplace_back(entry.first, entry.second);
+  }
+  return res;
 }
 
 }  // namespace stewkk::db::logic::storage

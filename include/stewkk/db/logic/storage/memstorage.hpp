@@ -16,7 +16,6 @@ public:
   virtual Result<std::optional<std::string>> Get(std::string key) = 0;
   virtual void Remove(std::string key) = 0;
   virtual void Insert(KwPair data) = 0;
-  virtual void Clear() = 0;
   virtual size_t Size() = 0;
 
   virtual ~KwStorage() = default;

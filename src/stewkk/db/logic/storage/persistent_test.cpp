@@ -12,7 +12,7 @@ using ::testing::Eq;
 
 namespace stewkk::db::logic::storage {
 
-ReadonlyMemoryStorage InitStorage() {
+std::vector<StorageEntry> InitStorage() {
   MapStorage memory;
   for (size_t i = 0; i < 10; i++) {
     memory.Insert({
@@ -20,7 +20,8 @@ ReadonlyMemoryStorage InitStorage() {
         std::format("value{}", std::to_string(i)),
     });
   }
-  return ReadonlyMemoryStorage(std::move(memory));
+  auto map = memory.GetUnderlying();
+  return ToEntries(std::move(map));
 }
 
 TEST(PersistentStorageTest, Get) {
@@ -35,8 +36,8 @@ TEST(PersistentStorageTest, Erased) {
   MapStorage memory;
   memory.Insert({"key", "value"});
   memory.Remove("key");
-  PersistentStorage persistent
-      = NewPersistentStorage(ReadonlyMemoryStorage(std::move(memory))).value();
+  auto map = memory.GetUnderlying();
+  PersistentStorage persistent = NewPersistentStorage(ToEntries(std::move(map))).value();
 
   auto got = persistent.Get("key");
 

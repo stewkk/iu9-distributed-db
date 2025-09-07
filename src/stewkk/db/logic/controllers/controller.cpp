@@ -58,6 +58,8 @@ void Controller::SwapToPersistentStorage(const boost::asio::yield_context& yield
     return;
   }
 
+  storage_.RemoveCollected();
+
   remove_callback();
 
   storage::RunCompaction(persistent_storage_, yield);
