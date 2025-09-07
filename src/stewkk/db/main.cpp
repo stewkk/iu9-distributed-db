@@ -65,8 +65,8 @@ void RunServer(uint16_t port) {
 
 int main(int argc, char** argv) {
   absl::ParseCommandLine(argc, argv);
-  absl::SetGlobalVLogLevel(absl::GetFlag(FLAGS_debug_level));
   absl::InitializeLog();
+  absl::SetGlobalVLogLevel(absl::GetFlag(FLAGS_debug_level));
   auto logfile = absl::GetFlag(FLAGS_logfile);
   std::unique_ptr<stewkk::db::logic::log::FileLogSink> sink;
   if (!logfile.empty()) {

@@ -94,6 +94,18 @@ Result<> PersistentStorageCollection::Add(PersistentStorage&& storage) {
   return result::Ok();
 }
 
+Result<> PersistentStorageCollection::Add(PersistentStorage&& storage,
+                                          const boost::asio::yield_context& yield) {
+  auto got = AppendMetadata(storage);
+  if (got.has_failure()) {
+    return got;
+  }
+  boost::asio::post(boost::asio::bind_executor(strand_, yield));
+  collection_.push_back(std::move(storage));
+  boost::asio::post(boost::asio::bind_executor(executor_, yield));
+  return result::Ok();
+}
+
 Result<StorageEntry> PersistentStorageCollection::Get(std::string_view key,
                                                       const boost::asio::yield_context& yield) {
   boost::asio::post(boost::asio::bind_executor(strand_, yield));
@@ -140,9 +152,10 @@ Result<> PersistentStorageCollection::SwapWith(PersistentStorage&& storage,
     to_delete.push_back(storage.Path());
   }
 
-  boost::asio::post(boost::asio::bind_executor(strand_, yield));
   std::vector<PersistentStorage> new_collection;
   new_collection.emplace_back(std::move(storage));
+
+  boost::asio::post(boost::asio::bind_executor(strand_, yield));
   collection_ = std::move(new_collection);
   boost::asio::post(boost::asio::bind_executor(executor_, yield));
 

@@ -14,6 +14,7 @@ public:
   explicit PersistentStorageCollection(boost::asio::any_io_executor executor);
 
   Result<> Add(PersistentStorage&& storage);
+  Result<> Add(PersistentStorage&& storage, const boost::asio::yield_context& yield);
   Result<StorageEntry> Get(std::string_view key, const boost::asio::yield_context& yield);
   size_t Size() const;
   Result<> SwapWith(PersistentStorage&& storage, const boost::asio::yield_context& yield);

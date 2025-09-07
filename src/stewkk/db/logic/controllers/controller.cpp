@@ -52,7 +52,7 @@ void Controller::SwapToPersistentStorage(const boost::asio::yield_context& yield
     return;
   }
 
-  auto err = persistent_storage_.Add(std::move(persistent_opt).assume_value());
+  auto err = persistent_storage_.Add(std::move(persistent_opt).assume_value(), yield);
   if (err.has_failure()) {
     LOG(ERROR) << "SwapToPersistentStorage failed: " << err.assume_error().What();
     return;

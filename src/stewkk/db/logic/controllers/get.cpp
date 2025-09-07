@@ -13,7 +13,7 @@ result::Result<ValueDTO> Controller::Get(const boost::asio::yield_context& yield
     return result::MakeError<result::ErrorType::kNotFound>("key {} not found", key);
   }
   auto persistent_opt = persistent_storage_.Get(key, yield);
-  if (mem_opt.has_value()) {
+  if (persistent_opt.has_value()) {
     auto res = persistent_opt.assume_value().value;
     if (res.has_value()) {
       return result::Ok(ValueDTO{res.value()});
