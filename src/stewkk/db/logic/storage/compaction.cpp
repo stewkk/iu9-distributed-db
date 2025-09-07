@@ -30,6 +30,12 @@ Result<PersistentStorage> MergeData(PersistentStorageCollection& collection) {
   auto comparator = [](const IteratorPair& lhs, const IteratorPair& rhs) {
     auto lhs_opt = *(lhs.first);
     auto rhs_opt = *(rhs.first);
+    VLOG(3) << "merging lhs value from: " << lhs.first.storage->Path() << " with index "
+            << lhs.first.index_iterator - lhs.first.storage->begin().index_iterator << " and size "
+            << lhs.first.storage->end().index_iterator - lhs.first.storage->begin().index_iterator;
+    VLOG(3) << "merging rhs value from: " << rhs.first.storage->Path() << " with index "
+            << rhs.first.index_iterator - rhs.first.storage->begin().index_iterator << " and size "
+            << rhs.first.storage->end().index_iterator - rhs.first.storage->begin().index_iterator;
     if (lhs_opt.has_failure()) {
       LOG(ERROR) << "error while merging data from persistent storages: "
                  << lhs_opt.assume_error().What();
@@ -56,8 +62,8 @@ Result<PersistentStorage> MergeData(PersistentStorageCollection& collection) {
                                "failed to merge data from persistent storages");
     }
     data.push_back(std::move(data_opt).assume_value());
+    ++cur;
     if (cur != end) {
-      ++cur;
       queue.push({cur, end});
     }
   }

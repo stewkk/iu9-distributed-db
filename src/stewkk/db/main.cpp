@@ -29,6 +29,7 @@
 ABSL_FLAG(uint16_t, port, 50051, "Server port for the db");
 ABSL_FLAG(std::string, logfile, "", "Where to write logs. Default is stderr");
 ABSL_FLAG(std::string, datadir, "/tmp/iu9-distributed-db", "Data directory");
+ABSL_FLAG(uint16_t, debug_level, 0, "Debug logs level");
 
 void RunServer(uint16_t port) {
   auto server_address = std::format("0.0.0.0:{}", port);
@@ -64,6 +65,7 @@ void RunServer(uint16_t port) {
 
 int main(int argc, char** argv) {
   absl::ParseCommandLine(argc, argv);
+  absl::SetGlobalVLogLevel(absl::GetFlag(FLAGS_debug_level));
   absl::InitializeLog();
   auto logfile = absl::GetFlag(FLAGS_logfile);
   std::unique_ptr<stewkk::db::logic::log::FileLogSink> sink;

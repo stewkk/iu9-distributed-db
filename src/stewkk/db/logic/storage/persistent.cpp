@@ -148,7 +148,8 @@ Result<StorageEntry> PersistentStorage::ReadEntryAt(uint64_t offset) const {
   lseek(fd_, offset, SEEK_SET);
   google::protobuf::io::FileInputStream stream(fd_);
   persistent::Entry entry;
-  LOG(INFO) << "trying to read entry at offset = " << offset;
+  VLOG(3) << "trying to read entry at offset = " << offset << " storage = " << path_
+          << " greatest offset = " << index_.back();
   bool is_ok = google::protobuf::util::ParseDelimitedFromZeroCopyStream(&entry, &stream, nullptr);
   if (!is_ok) {
     return MakeError("failed to read entry from persistent storage");
