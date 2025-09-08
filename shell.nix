@@ -33,7 +33,7 @@ pkgs.mkShell.override {stdenv = pkgs.llvmPackages_18.stdenv;} {
     pkgs.patchelf
     pkgs.openjdk17
     pkgs.protoc-gen-grpc-java
-    pkgs.clickhouse
+    pkgs.zookeeper
 
     # keep this line if you use bash
     pkgs.bashInteractive
