@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<clickhouse>
+  <path>../build/clickhouse-keeper/</path>
+    <logger>
+        <level>trace</level>
+        <log>../build/clickhouse-keeper/clickhouse-keeper.log</log>
+        <errorlog>../build/clickhouse-keeper/clickhouse-keeper.err.log</errorlog>
+        <size>1000M</size>
+        <count>3</count>
+    </logger>
+    <listen_host>0.0.0.0</listen_host>
+    <keeper_server>
+        <tcp_port>9181</tcp_port>
+        <server_id>11</server_id>
+        <log_storage_path>../build/clickhouse-keeper/coordination/log</log_storage_path>
+        <snapshot_storage_path>../build/clickhouse-keeper/coordination/snapshots</snapshot_storage_path>
+        <coordination_settings>
+            <operation_timeout_ms>10000</operation_timeout_ms>
+            <session_timeout_ms>30000</session_timeout_ms>
+            <raft_logs_level>trace</raft_logs_level>
+        </coordination_settings>
+        <raft_configuration>
+            <server>
+                <id>11</id>
+                <hostname>localhost</hostname>
+                <port>9182</port>
+                <can_become_leader>true</can_become_leader>
+                <priority>1</priority>
+            </server>
+        </raft_configuration>
+    </keeper_server>
+</clickhouse>

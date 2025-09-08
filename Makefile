@@ -14,7 +14,10 @@ codegen:
 	protol --create-package --in-place --python-out ./src/stewkk/client/codegen/ protoc --proto-path=./src/stewkk/db/ --plugin=protoc-gen-grpc_python=./build/bin/grpc_python_plugin --python_out=./src/stewkk/client/codegen/ --pyi_out=./src/stewkk/client/codegen/ --grpc_python_out=./src/stewkk/client/codegen/ src/stewkk/db/api.proto
 	./scripts/codegen-java-client.sh
 
+keeper:
+	make --directory keeper
+
 jepsen:
 	make --directory jepsen/iu9-distributed-db
 
-.PHONY: codegen test build jepsen
+.PHONY: codegen test build jepsen keeper

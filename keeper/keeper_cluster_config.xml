@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<clickhouse>
+    <keeper_server>
+        <server_id>0</server_id>
+        <raft_configuration>
+            <server>
+                <id>0</id>
+                <hostname>ck0</hostname>
+                <port>9234</port>
+            </server>
+            <server>
+                <id>1</id>
+                <hostname>ck1</hostname>
+                <port>9234</port>
+            </server>
+            <server>
+                <id>2</id>
+                <hostname>ck2</hostname>
+                <port>9234</port>
+            </server>
+        </raft_configuration>
+    </keeper_server>
+</clickhouse>

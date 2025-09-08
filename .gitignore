@@ -6,3 +6,4 @@
 /src/stewkk/client/codegen/example_pb2_grpc.py
 /src/stewkk/client/codegen/example_pb2.pyi
 /src/stewkk/client/codegen/example_pb2.py
+/keeper/keeper_single_config-preprocessed.xml
