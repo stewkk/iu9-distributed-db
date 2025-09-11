@@ -1,6 +1,7 @@
 include(FetchGRPC)
 include(FetchBoost)
 include(FetchAsioGrpc)
+include(FetchZookeeper)
 
 get_filename_component(api_proto "api.proto" ABSOLUTE)
 get_filename_component(api_proto_path "${api_proto}" PATH)
@@ -97,6 +98,7 @@ add_library(libdb
   views/insert.cpp
   views/remove.cpp
   views/get.cpp
+  logic/coordination/zookeeper.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
 target_compile_features(libdb PUBLIC cxx_std_20)
@@ -113,6 +115,7 @@ target_include_directories(
 target_compile_options(libdb PRIVATE ${BASE_COMPILE_FLAGS})
 target_link_options(libdb PRIVATE ${BASE_LINK_FLAGS})
 target_link_libraries(libdb
+  zookeeper-client
   Boost::outcome
   Boost::uuid
   Boost::unordered
@@ -137,6 +140,7 @@ set_target_properties(iu9-db PROPERTIES
 target_compile_options(iu9-db PRIVATE ${BASE_COMPILE_FLAGS})
 target_link_libraries(iu9-db
   stewkk::libdb
+  zookeeper-client
   asio-grpc::asio-grpc
   api_grpc_proto
   wal_grpc_proto
