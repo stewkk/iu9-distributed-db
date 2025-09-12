@@ -19,6 +19,7 @@
 
 #include <api.grpc.pb.h>
 
+#include <stewkk/db/logic/coordination/zookeeper.hpp>
 #include <stewkk/db/logic/log/file_log_sink.hpp>
 #include <stewkk/db/logic/recovery/swappable_wal_writer_impl.hpp>
 #include <stewkk/db/logic/recovery/wal_reader.hpp>
@@ -57,6 +58,13 @@ void RunServer(uint16_t port) {
   stewkk::db::views::HandlersProxy handlers(stewkk::db::logic::controllers::Controller{
       storage, wal_writer, wal_writer, persistent, grpc_context.get_executor()});
   stewkk::db::views::RegisterHandlers(handlers, grpc_context, service);
+
+  auto err = stewkk::db::logic::coordination::InitZookeeper({"localhost:2181"});
+  if (err.has_failure()) {
+    LOG(FATAL) << "failed to connect to zookeeper: " << err.assume_error().What();
+  }
+  stewkk::db::logic::coordination::WaitConnection();
+  stewkk::db::logic::coordination::TryBecomeMaster();
 
   LOG(INFO) << "Server listening on " << server_address;
   grpc_context.run();
