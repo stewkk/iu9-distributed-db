@@ -65,8 +65,6 @@ void RunServer(uint16_t port, std::vector<std::string> zookeeper_hosts) {
   if (err.has_failure()) {
     LOG(FATAL) << "failed to connect to zookeeper: " << err.assume_error().What();
   }
-  stewkk::db::logic::coordination::WaitConnection();
-  stewkk::db::logic::coordination::TryBecomeMaster();
 
   LOG(INFO) << "Server listening on " << server_address;
   grpc_context.run();
