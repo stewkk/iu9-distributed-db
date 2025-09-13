@@ -33,8 +33,9 @@ ABSL_FLAG(std::string, datadir, "/tmp/iu9-distributed-db", "Data directory");
 ABSL_FLAG(uint16_t, debug_level, 0, "Debug logs level");
 ABSL_FLAG(std::vector<std::string>, zookeeper_hosts, std::vector<std::string>({"localhost:2181"}),
           "Zookeeper hosts");
+ABSL_FLAG(std::string, host, "localhost", "Current host");
 
-void RunServer(uint16_t port, std::vector<std::string> zookeeper_hosts) {
+void RunServer(std::string host, uint16_t port, std::vector<std::string> zookeeper_hosts) {
   auto server_address = std::format("0.0.0.0:{}", port);
   iu9db::Db::AsyncService service;
   const auto thread_count = std::thread::hardware_concurrency();
@@ -61,7 +62,8 @@ void RunServer(uint16_t port, std::vector<std::string> zookeeper_hosts) {
       storage, wal_writer, wal_writer, persistent, grpc_context.get_executor()});
   stewkk::db::views::RegisterHandlers(handlers, grpc_context, service);
 
-  auto err = stewkk::db::logic::coordination::InitZookeeper(std::move(zookeeper_hosts));
+  auto err
+      = stewkk::db::logic::coordination::InitZookeeper(std::move(host), std::move(zookeeper_hosts));
   if (err.has_failure()) {
     LOG(FATAL) << "failed to connect to zookeeper: " << err.assume_error().What();
   }
@@ -83,6 +85,7 @@ int main(int argc, char** argv) {
   }
   absl::SetStderrThreshold(absl::LogSeverity::kInfo);
   stewkk::db::logic::filesystem::SetDataDir(absl::GetFlag(FLAGS_datadir));
-  RunServer(absl::GetFlag(FLAGS_port), absl::GetFlag(FLAGS_zookeeper_hosts));
+  RunServer(absl::GetFlag(FLAGS_host), absl::GetFlag(FLAGS_port),
+            absl::GetFlag(FLAGS_zookeeper_hosts));
   return 0;
 }

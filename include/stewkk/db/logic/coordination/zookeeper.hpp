@@ -9,6 +9,10 @@
 
 namespace stewkk::db::logic::coordination {
 
-result::Result<> InitZookeeper(std::vector<std::string> zookeeper_hosts);
+result::Result<> InitZookeeper(std::string db_host, std::vector<std::string> zookeeper_hosts);
+
+result::Result<std::string> GetMaster();
+bool IsMaster();
+result::Result<std::vector<std::string>> GetNodes();
 
 }  // namespace stewkk::db::logic::coordination
