@@ -49,7 +49,7 @@ TEST(RecoveryTest, MemstorageInitialization) {
   }
 
   boost::asio::thread_pool pool{1};
-  auto [persistent_collection, memstorage, wal_writer]
+  auto [persistent_collection, memstorage, wal_writer, _]
       = InitializeStorages(pool.get_executor(), 1).value();
 
   std::optional<std::string> got1;
@@ -82,7 +82,7 @@ TEST(RecoveryTest, WalWriterInitialization) {
   fs::path path;
   {
     boost::asio::thread_pool pool{1};
-    auto [_, _, wal_writer] = InitializeStorages(pool.get_executor(), 1).value();
+    auto [_, _, wal_writer, _] = InitializeStorages(pool.get_executor(), 1).value();
     boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
       wal_writer.Insert(yield, KwPair{"f", "g"}).value();
       path = wal_writer.GetPath(yield);

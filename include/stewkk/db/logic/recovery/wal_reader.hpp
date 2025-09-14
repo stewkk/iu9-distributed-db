@@ -4,6 +4,7 @@
 
 #include <boost/asio/executor.hpp>
 
+#include <stewkk/db/logic/coordination/global_versioning.hpp>
 #include <stewkk/db/logic/recovery/swappable_wal_writer_impl.hpp>
 #include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/logic/storage/memstorage.hpp>
@@ -35,7 +36,7 @@ Result<std::vector<fs::path>> SearchWALFiles();
 void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage);
 
 Result<std::tuple<storage::PersistentStorageCollection, storage::SwappableMemoryStorage,
-                  SwappableWalWriterImpl>>
+                  SwappableWalWriterImpl, coordination::VersionNumberGenerator>>
 InitializeStorages(boost::asio::any_io_executor executor,
                    size_t threshold = 5000);  // TODO: inconsistent threshold!
 

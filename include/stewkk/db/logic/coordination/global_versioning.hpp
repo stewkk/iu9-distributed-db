@@ -10,6 +10,9 @@ public:
   explicit VersionNumberGenerator(uint64_t start);
   uint64_t Generate();
 
+  VersionNumberGenerator(VersionNumberGenerator&& other);
+  VersionNumberGenerator& operator=(VersionNumberGenerator&& other);
+
 private:
   std::atomic<uint64_t> current_;
 };

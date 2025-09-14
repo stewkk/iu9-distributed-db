@@ -4,7 +4,7 @@ namespace stewkk::db::logic::controllers {
 
 result::Result<> Controller::Insert(const boost::asio::yield_context& yield, KwDTO data) {
   if (!data.version.has_value()) {
-    data.version = 0;  // TODO: generate new version
+    data.version = version_generator_.Generate();
   }
 
   auto [key, value, version] = std::move(data);

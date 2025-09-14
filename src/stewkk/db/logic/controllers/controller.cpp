@@ -15,12 +15,14 @@ constexpr static size_t kThreshold = 5;
 Controller::Controller(storage::SwappableMemoryStorage& storage, recovery::WALWriter& wal_writer,
                        recovery::SwappableWalWriter& swappablewal_writer,
                        storage::PersistentStorageCollection& persistent_storage,
+                       coordination::VersionNumberGenerator& version_generator,
                        boost::asio::any_io_executor executor)
     : storage_(storage),
       wal_writer_(wal_writer),
       swappable_wal_writer_(swappablewal_writer),
       persistent_storage_(persistent_storage),
       swap_job_guard_(),
+      version_generator_(version_generator),
       executor_(executor) {}
 
 void Controller::TriggerSwapToPersistentStorage() {

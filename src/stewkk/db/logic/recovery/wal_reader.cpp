@@ -1,5 +1,7 @@
 #include <stewkk/db/logic/recovery/wal_reader.hpp>
 
+#include <ranges>
+
 #include <absl/log/log.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/util/delimited_message_util.h>
@@ -11,6 +13,14 @@
 #include <stewkk/db/models/storage/kw_pair.hpp>
 
 namespace stewkk::db::logic::recovery {
+
+namespace {
+
+uint64_t GetMaxVersion(const std::vector<Operation>& operations) {
+  return std::ranges::max_element(operations, std::less{}, &Operation::version)->version;
+}
+
+}  // namespace
 
 Result<std::pair<std::vector<Operation>, int64_t>> ReadWAL(fs::path path) {
   LOG(INFO) << std::format("loading WAL file: {}", path.string());
@@ -100,7 +110,7 @@ void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage
 }
 
 Result<std::tuple<storage::PersistentStorageCollection, storage::SwappableMemoryStorage,
-                  SwappableWalWriterImpl>>
+                  SwappableWalWriterImpl, coordination::VersionNumberGenerator>>
 InitializeStorages(boost::asio::any_io_executor executor, size_t threshold) {
   storage::PersistentStorageCollection persistent_collection(executor);
   storage::SwappableMemoryStorage memstorage;
@@ -113,6 +123,7 @@ InitializeStorages(boost::asio::any_io_executor executor, size_t threshold) {
   if (files.size() > 2) {
     LOG(WARNING) << "more than 2 WAL files";
   }
+  uint64_t max_version = 0;
   for (const auto& file : files) {
     auto err = ReadWAL(file);
     if (err.has_failure()) {
@@ -121,6 +132,7 @@ InitializeStorages(boost::asio::any_io_executor executor, size_t threshold) {
     auto [operations, position] = err.assume_value();
     storage::MapStorage storage;
     Apply(operations, storage);
+    max_version = std::max(max_version, GetMaxVersion(operations));
     if (storage.Size() > threshold) {
       // TODO: MoveUnderlying() ?
       auto data = storage.GetUnderlying();
@@ -151,7 +163,8 @@ InitializeStorages(boost::asio::any_io_executor executor, size_t threshold) {
     }
     wal_writer = std::move(wal_writer_opt).assume_value();
   }
-  return {std::move(persistent_collection), std::move(memstorage), std::move(wal_writer).value()};
+  return {std::move(persistent_collection), std::move(memstorage), std::move(wal_writer).value(),
+          coordination::VersionNumberGenerator(max_version + 1)};
 }
 
 }  // namespace stewkk::db::logic::recovery

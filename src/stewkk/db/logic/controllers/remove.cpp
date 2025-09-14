@@ -5,7 +5,7 @@ namespace stewkk::db::logic::controllers {
 result::Result<> Controller::Remove(const boost::asio::yield_context& yield, KeyDTO data) {
   auto [key, version] = std::move(data);
   if (!version.has_value()) {
-    version = 0;  // TODO: set global version number
+    version = version_generator_.Generate();
   }
   auto res = wal_writer_.Remove(yield, key, version.value());
   if (res.has_failure()) {
