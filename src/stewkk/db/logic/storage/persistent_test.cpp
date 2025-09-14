@@ -35,7 +35,7 @@ TEST(PersistentStorageTest, Get) {
 TEST(PersistentStorageTest, Erased) {
   MapStorage memory;
   memory.Insert({"key", "value"});
-  memory.Remove("key");
+  memory.Remove("key", 0);
   auto map = memory.GetUnderlying();
   PersistentStorage persistent = NewPersistentStorage(ToEntries(std::move(map))).value();
 

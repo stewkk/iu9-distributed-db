@@ -15,7 +15,7 @@ TEST(SwappableStorageTest, Get) {
 
   auto got = storage.Get("key");
 
-  ASSERT_THAT(got.value(), Optional(std::string{"value"}));
+  ASSERT_THAT(got.value().value, Optional(std::string{"value"}));
 }
 
 TEST(SwappableStorageTest, Collect) {

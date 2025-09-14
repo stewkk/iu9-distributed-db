@@ -3,8 +3,12 @@
 namespace stewkk::db::logic::controllers {
 
 result::Result<> Controller::Insert(const boost::asio::yield_context& yield, KwDTO data) {
+  if (!data.version.has_value()) {
+    data.version = 0;  // TODO: generate new version
+  }
+
   auto [key, value, version] = std::move(data);
-  models::storage::KwPair kw_pair{std::move(key), std::move(value)};
+  models::storage::KwPair kw_pair{std::move(key), std::move(value), std::move(version).value()};
   auto res = wal_writer_.Insert(yield, kw_pair);
   if (res.has_failure()) {
     return res;

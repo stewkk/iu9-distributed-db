@@ -57,9 +57,9 @@ TEST(RecoveryTest, MemstorageInitialization) {
     got1 = persistent_collection.Get("a", yield).value().value;
   });
   pool.join();
-  auto got2 = memstorage.Get("c").value().value();
+  auto got2 = memstorage.Get("c").value().value.value();
 
-  ASSERT_THAT(got1, Eq("b"));
+  ASSERT_THAT(got1.value(), Eq("b"));
   ASSERT_THAT(got2, Eq("d"));
 }
 

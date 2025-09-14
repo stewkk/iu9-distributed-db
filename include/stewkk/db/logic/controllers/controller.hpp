@@ -31,6 +31,8 @@ private:
   void SwapToPersistentStorage(const boost::asio::yield_context& yield);
   void TriggerSwapToPersistentStorage();
 
+  result::Result<> ReplicationInsert(const boost::asio::yield_context& yield, KwDTO data);
+
 private:
   storage::SwappableMemoryStorage& storage_;
   recovery::WALWriter& wal_writer_;

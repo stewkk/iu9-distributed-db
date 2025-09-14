@@ -16,7 +16,7 @@ TEST(MemoryStorageTest, Get) {
 
   auto got = storage.Get("key");
 
-  ASSERT_THAT(got.value(), Optional(std::string{"value"}));
+  ASSERT_THAT(got.value().value, Optional(std::string{"value"}));
 }
 
 TEST(MemoryStorageTest, GetNonExisting) {
@@ -31,11 +31,11 @@ TEST(MemoryStorageTest, GetAfterRemove) {
   MapStorage storage;
   KwPair data{.key = "key", .value = "value"};
   storage.Insert(data);
-  storage.Remove("key");
+  storage.Remove("key", 0);
 
   auto got = storage.Get("key").value();
 
-  ASSERT_THAT(got, Eq(std::nullopt));
+  ASSERT_THAT(got.value, Eq(std::nullopt));
 }
 
 TEST(MemoryStorageTest, InsertUpdatesExistingKey) {
@@ -47,7 +47,7 @@ TEST(MemoryStorageTest, InsertUpdatesExistingKey) {
   storage.Insert(data);
   auto got = storage.Get("key");
 
-  ASSERT_THAT(got.value().value(), Eq("other"));
+  ASSERT_THAT(got.value().value.value(), Eq("other"));
 }
 
 }  // namespace stewkk::db::logic::storage

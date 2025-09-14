@@ -87,10 +87,11 @@ void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage
   for (auto& operation : operations) {
     switch (operation.type) {
       case OperationType::kInsert:
-        storage.Insert(models::storage::KwPair{operation.key, operation.value.value()});
+        storage.Insert(
+            models::storage::KwPair{operation.key, operation.value.value(), operation.version});
         break;
       case OperationType::kRemove:
-        storage.Remove(operation.key);
+        storage.Remove(operation.key, operation.version);
         break;
     }
   }

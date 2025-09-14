@@ -22,8 +22,8 @@ public:
   SwappableMemoryStorage& operator=(const SwappableMemoryStorage& other) = delete;
   SwappableMemoryStorage& operator=(SwappableMemoryStorage&& other);
 
-  virtual Result<std::optional<std::string>> Get(std::string key) override;
-  virtual void Remove(std::string key) override;
+  virtual Result<Value> Get(std::string key) override;
+  virtual void Remove(std::string key, uint64_t version) override;
   virtual void Insert(KwPair data) override;
   virtual size_t Size() override;
 

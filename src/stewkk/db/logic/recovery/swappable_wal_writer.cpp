@@ -45,6 +45,7 @@ Result<> SwappableWalWriterImpl::Insert(const boost::asio::yield_context& yield,
   auto* insert_op = entry.mutable_insert();
   insert_op->set_key(std::move(data).key);
   insert_op->set_value(std::move(data).value);
+  auto version = std::move(data).version;
 
   return WriteEntry(yield, std::move(entry));
 }

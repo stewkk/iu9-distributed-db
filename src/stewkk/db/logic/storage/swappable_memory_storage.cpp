@@ -41,7 +41,7 @@ SwappableMemoryStorage& SwappableMemoryStorage::operator=(SwappableMemoryStorage
   return *this;
 }
 
-Result<std::optional<std::string>> SwappableMemoryStorage::Get(std::string key) {
+Result<Value> SwappableMemoryStorage::Get(std::string key) {
   auto ptr = reader_first_.load();
   auto reader = ptr->Add();
   auto res = reader->Get(key);
@@ -58,10 +58,10 @@ Result<std::optional<std::string>> SwappableMemoryStorage::Get(std::string key) 
   return res;
 }
 
-void SwappableMemoryStorage::Remove(std::string key) {
+void SwappableMemoryStorage::Remove(std::string key, uint64_t version) {
   auto ptr = writer_.load();
   auto writer = ptr->Add();
-  writer->Remove(std::move(key));
+  writer->Remove(std::move(key), std::move(version));
   ptr->Remove();
 }
 

@@ -85,7 +85,7 @@ Result<StorageEntry> PersistentStorage::Get(std::string_view key) {
   auto it = std::lower_bound(index_.cbegin(), index_.cend(), key,
                              [this](const int64_t& offset, std::string_view key) -> bool {
                                auto entry_opt = ReadEntryAt(offset);
-                               auto [entry_key, _] = entry_opt.value();
+                               auto [entry_key, _, _] = entry_opt.value();
                                return entry_key < key;
                              });
 

@@ -13,6 +13,7 @@ using result::Result;
 struct StorageEntry {
   std::string key;
   std::optional<std::string> value;
+  uint64_t version;
 
   auto operator<=>(const StorageEntry& other) const = default;
 };

@@ -11,10 +11,15 @@ namespace stewkk::db::logic::storage {
 using models::storage::KwPair;
 using result::Result;
 
+struct Value {
+  std::optional<std::string> value;
+  uint64_t version;
+};
+
 class KwStorage {
 public:
-  virtual Result<std::optional<std::string>> Get(std::string key) = 0;
-  virtual void Remove(std::string key) = 0;
+  virtual Result<Value> Get(std::string key) = 0;
+  virtual void Remove(std::string key, uint64_t version) = 0;
   virtual void Insert(KwPair data) = 0;
   virtual size_t Size() = 0;
 

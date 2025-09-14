@@ -23,6 +23,7 @@ struct Operation {
   OperationType type;
   std::string key;
   std::optional<std::string> value;
+  uint64_t version;
 
   bool operator<=>(const Operation& other) const = default;
 };
@@ -36,6 +37,6 @@ void Apply(const std::vector<Operation>& operations, storage::KwStorage& storage
 Result<std::tuple<storage::PersistentStorageCollection, storage::SwappableMemoryStorage,
                   SwappableWalWriterImpl>>
 InitializeStorages(boost::asio::any_io_executor executor,
-                   size_t threshold = 5000);  // TODO: FIXME: inconsistent threshold!
+                   size_t threshold = 5000);  // TODO: inconsistent threshold!
 
 }  // namespace stewkk::db::logic::recovery

@@ -17,14 +17,14 @@ using result::Result;
 
 class MapStorage : public KwStorage {
 private:
-  using Map = boost::concurrent_flat_map<std::string, std::optional<std::string>>;
+  using Map = boost::concurrent_flat_map<std::string, Value>;
 
 public:
   MapStorage() = default;
   explicit MapStorage(Map&& other);
 
-  virtual Result<std::optional<std::string>> Get(std::string key) override;
-  virtual void Remove(std::string key) override;
+  virtual Result<Value> Get(std::string key) override;
+  virtual void Remove(std::string key, uint64_t version) override;
   virtual void Insert(KwPair data) override;
   virtual size_t Size() override;
 
@@ -34,7 +34,6 @@ private:
   Map map_;
 };
 
-std::vector<StorageEntry> ToEntries(
-    boost::unordered_flat_map<std::string, std::optional<std::string>> map);
+std::vector<StorageEntry> ToEntries(boost::unordered_flat_map<std::string, Value> map);
 
 }  // namespace stewkk::db::logic::storage
