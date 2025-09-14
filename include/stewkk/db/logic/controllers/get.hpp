@@ -9,7 +9,8 @@ namespace stewkk::db::logic::controllers {
 
 class GetController {
 public:
-  virtual result::Result<ValueDTO> Get(const boost::asio::yield_context& yield, KeyDTO data) = 0;
+  virtual result::Result<ValueDTO> Get(const boost::asio::yield_context& yield, GetRequestDTO data)
+      = 0;
 
   virtual ~GetController() = default;
 };

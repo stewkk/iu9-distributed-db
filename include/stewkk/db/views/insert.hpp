@@ -9,7 +9,9 @@ namespace stewkk::db::views {
 
 using logic::controllers::InsertController;
 
-void InsertHandler(InsertController& controller, InsertRPC& rpc, InsertRPC::Request& request,
-                   const boost::asio::yield_context& yield);
+logic::result::Result<InsertRPC::Response> InsertHandler(InsertController& controller,
+                                                         InsertRPC& rpc,
+                                                         InsertRPC::Request& request,
+                                                         const boost::asio::yield_context& yield);
 
 }  // namespace stewkk::db::views

@@ -4,21 +4,16 @@ namespace stewkk::db::views {
 
 using logic::controllers::KeyDTO;
 
-void RemoveHandler(RemoveController& controller, RemoveRPC& rpc, RemoveRPC::Request& request,
-                   const boost::asio::yield_context& yield) {
-  auto got = controller.Remove(yield, KeyDTO{request.key()});
+logic::result::Result<RemoveRPC::Response> RemoveHandler(RemoveController& controller,
+                                                         RemoveRPC& rpc,
+                                                         RemoveRPC::Request& request,
+                                                         const boost::asio::yield_context& yield) {
+  auto got = controller.Remove(yield, KeyDTO{request.key(), request.version()});
   if (got.has_failure()) {
-    auto& error = got.assume_error();
-    if (error.Wraps(logic::result::ErrorType::kNotFound)) {
-      rpc.finish_with_error(grpc::Status(grpc::NOT_FOUND, error.What()), yield);
-      return;
-    }
-
-    rpc.finish_with_error(grpc::Status(grpc::UNKNOWN, "unknown error"), yield);
-    return;
+    return logic::result::WrapError(std::move(got), "remove controller failed");
   }
   RemoveRPC::Response response;
-  rpc.finish(response, grpc::Status::OK, yield);
+  return response;
 }
 
 }  // namespace stewkk::db::views

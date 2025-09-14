@@ -3,7 +3,7 @@
 namespace stewkk::db::logic::controllers {
 
 result::Result<> Controller::Remove(const boost::asio::yield_context& yield, KeyDTO data) {
-  auto [key] = std::move(data);
+  auto [key, version] = std::move(data);
   auto res = wal_writer_.Remove(yield, key);
   if (res.has_failure()) {
     return res;

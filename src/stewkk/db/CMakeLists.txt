@@ -99,6 +99,7 @@ add_library(libdb
   views/remove.cpp
   views/get.cpp
   logic/coordination/zookeeper.cpp
+  views/is_master_middleware.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
 target_compile_features(libdb PUBLIC cxx_std_20)

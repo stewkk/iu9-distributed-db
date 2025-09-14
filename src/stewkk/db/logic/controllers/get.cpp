@@ -2,7 +2,8 @@
 
 namespace stewkk::db::logic::controllers {
 
-result::Result<ValueDTO> Controller::Get(const boost::asio::yield_context& yield, KeyDTO data) {
+result::Result<ValueDTO> Controller::Get(const boost::asio::yield_context& yield,
+                                         GetRequestDTO data) {
   auto [key] = data;
   auto mem_opt = storage_.Get(key);
   if (mem_opt.has_value()) {

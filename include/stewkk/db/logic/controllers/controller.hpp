@@ -25,7 +25,7 @@ public:
   virtual result::Result<> Insert(const boost::asio::yield_context& yield, KwDTO data) override;
   virtual result::Result<> Remove(const boost::asio::yield_context& yield, KeyDTO data) override;
   virtual result::Result<ValueDTO> Get(const boost::asio::yield_context& yield,
-                                       KeyDTO data) override;
+                                       GetRequestDTO data) override;
 
 private:
   void SwapToPersistentStorage(const boost::asio::yield_context& yield);

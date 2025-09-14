@@ -9,7 +9,9 @@ namespace stewkk::db::views {
 
 using logic::controllers::RemoveController;
 
-void RemoveHandler(RemoveController& controller, RemoveRPC& rpc, RemoveRPC::Request& request,
-                   const boost::asio::yield_context& yield);
+logic::result::Result<RemoveRPC::Response> RemoveHandler(RemoveController& controller,
+                                                         RemoveRPC& rpc,
+                                                         RemoveRPC::Request& request,
+                                                         const boost::asio::yield_context& yield);
 
 }  // namespace stewkk::db::views

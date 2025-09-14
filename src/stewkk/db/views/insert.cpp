@@ -2,15 +2,17 @@
 
 namespace stewkk::db::views {
 
-void InsertHandler(InsertController& controller, InsertRPC& rpc, InsertRPC::Request& request,
-                   const boost::asio::yield_context& yield) {
-  auto got = controller.Insert(yield, logic::controllers::KwDTO{request.key(), request.value()});
+logic::result::Result<InsertRPC::Response> InsertHandler(InsertController& controller,
+                                                         InsertRPC& rpc,
+                                                         InsertRPC::Request& request,
+                                                         const boost::asio::yield_context& yield) {
+  auto got = controller.Insert(
+      yield, logic::controllers::KwDTO{request.key(), request.value(), request.version()});
   if (got.has_failure()) {
-    rpc.finish_with_error(grpc::Status(grpc::UNKNOWN, "unknown error"), yield);
-    return;
+    return logic::result::WrapError(std::move(got), "insert controller failed");
   }
   InsertRPC::Response response;
-  rpc.finish(response, grpc::Status::OK, yield);
+  return response;
 }
 
 }  // namespace stewkk::db::views
