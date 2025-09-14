@@ -41,6 +41,7 @@ Result<PersistentStorage> NewPersistentStorage(std::vector<StorageEntry> data) {
     if (entry.value.has_value()) {
       protobuf_entry.set_value(entry.value.value());
     }
+    protobuf_entry.set_version(entry.version);
 
     auto offset = f.tellp();
     index.push_back(offset);
@@ -159,6 +160,7 @@ Result<StorageEntry> PersistentStorage::ReadEntryAt(uint64_t offset) const {
   if (entry.has_value()) {
     res.value = entry.value();
   }
+  res.version = entry.version();
   return res;
 }
 

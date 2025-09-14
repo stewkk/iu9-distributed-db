@@ -18,4 +18,5 @@ message TableIndex {
 message Entry {
   optional string key = 1;
   optional string value = 2;
+  optional uint64 version = 3;
 };
