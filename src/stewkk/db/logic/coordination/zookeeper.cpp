@@ -285,6 +285,8 @@ result::Result<std::string> GetMaster() {
 
 bool IsMaster() { return kIsMaster.test(); }
 
+bool IsConnectionExpired() { return kExpired.test(); }
+
 result::Result<std::vector<std::string>> GetNodes() {
   auto nodes_ptr = kNodes.load();
   if (!nodes_ptr.get()) {

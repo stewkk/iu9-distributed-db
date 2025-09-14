@@ -13,6 +13,7 @@ result::Result<> InitZookeeper(std::string db_host, std::vector<std::string> zoo
 
 result::Result<std::string> GetMaster();
 bool IsMaster();
+bool IsConnectionExpired();
 result::Result<std::vector<std::string>> GetNodes();
 
 }  // namespace stewkk::db::logic::coordination
