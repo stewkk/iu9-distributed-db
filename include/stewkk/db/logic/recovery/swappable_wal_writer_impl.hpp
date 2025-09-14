@@ -12,7 +12,8 @@ class SwappableWalWriterImpl : public WALWriter, public SwappableWalWriter {
 public:
   SwappableWalWriterImpl(WALWriterImpl* writer, boost::asio::any_io_executor);
 
-  virtual Result<> Remove(const boost::asio::yield_context& yield, std::string key) override;
+  virtual Result<> Remove(const boost::asio::yield_context& yield, std::string key,
+                          uint64_t version) override;
   virtual Result<> Insert(const boost::asio::yield_context& yield, KwPair data) override;
 
   virtual Result<RemoveWalCallback> Swap(const boost::asio::yield_context& yield) override;

@@ -7,7 +7,7 @@ result::Result<> Controller::Remove(const boost::asio::yield_context& yield, Key
   if (!version.has_value()) {
     version = 0;  // TODO: set global version number
   }
-  auto res = wal_writer_.Remove(yield, key);
+  auto res = wal_writer_.Remove(yield, key, version.value());
   if (res.has_failure()) {
     return res;
   }

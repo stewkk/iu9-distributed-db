@@ -32,10 +32,12 @@ result::Result<SwappableWalWriterImpl> LoadSwappableWalWriter(boost::asio::any_i
   return SwappableWalWriterImpl(writer_ptr, executor);
 }
 
-Result<> SwappableWalWriterImpl::Remove(const boost::asio::yield_context& yield, std::string key) {
+Result<> SwappableWalWriterImpl::Remove(const boost::asio::yield_context& yield, std::string key,
+                                        uint64_t version) {
   wal::Entry entry;
   auto* remove_op = entry.mutable_remove();
   remove_op->set_key(std::move(key));
+  remove_op->set_version(std::move(version));
 
   return WriteEntry(yield, std::move(entry));
 }
@@ -45,7 +47,7 @@ Result<> SwappableWalWriterImpl::Insert(const boost::asio::yield_context& yield,
   auto* insert_op = entry.mutable_insert();
   insert_op->set_key(std::move(data).key);
   insert_op->set_value(std::move(data).value);
-  auto version = std::move(data).version;
+  insert_op->set_version(std::move(data).version);
 
   return WriteEntry(yield, std::move(entry));
 }

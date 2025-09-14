@@ -17,7 +17,7 @@ TEST(WALTest, WriteAndReadLogs) {
   {
     auto writer = NewSwappableWalWriter(pool.get_executor()).value();
     boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
-      writer.Remove(yield, "blabla").value();
+      writer.Remove(yield, "blabla", 0).value();
       writer.Insert(yield, KwPair{"a", "b"}).value();
       path = writer.GetPath(yield);
     });
@@ -43,7 +43,7 @@ TEST(WALTest, Concurrent) {
 
     for (int i = 0; i < 20; ++i) {
       boost::asio::spawn(pool, [&writer](boost::asio::yield_context yield) {
-        writer.Remove(yield, "blabla").value();
+        writer.Remove(yield, "blabla", 0).value();
         writer.Insert(yield, KwPair{"a", "b"}).value();
       });
     }

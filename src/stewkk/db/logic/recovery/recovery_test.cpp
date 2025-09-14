@@ -21,7 +21,7 @@ TEST(RecoveryTest, SearchForWALFiles) {
   fs::path path;
   auto writer = NewSwappableWalWriter(pool.get_executor()).value();
   boost::asio::spawn(pool, [&](boost::asio::yield_context yield) {
-    writer.Remove(yield, "blabla").value();
+    writer.Remove(yield, "blabla", 0).value();
     writer.Insert(yield, KwPair{"a", "b"}).value();
     writer.Swap(yield).value();
   });

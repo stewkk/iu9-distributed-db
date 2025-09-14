@@ -43,12 +43,14 @@ Result<std::pair<std::vector<Operation>, int64_t>> ReadWAL(fs::path path) {
           OperationType::kInsert,
           entry.insert().key(),
           entry.insert().value(),
+          entry.insert().version(),
       });
     } else if (entry.has_remove()) {
       result.push_back(Operation{
           OperationType::kRemove,
           entry.remove().key(),
           std::nullopt,
+          entry.remove().version(),
       });
     } else {
       LOG(ERROR) << std::format("bad entry in wal file: {}", path.string());

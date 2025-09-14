@@ -4,11 +4,13 @@ package wal;
 
 message Remove {
   optional string key = 1;
+  optional uint64 version = 2;
 };
 
 message Insert {
   optional string key = 1;
   optional string value = 2;
+  optional uint64 version = 3;
 };
 
 message Entry {
