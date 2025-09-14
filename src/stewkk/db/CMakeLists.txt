@@ -99,6 +99,7 @@ add_library(libdb
   views/remove.cpp
   views/get.cpp
   logic/coordination/zookeeper.cpp
+  logic/coordination/global_versioning.cpp
   views/is_master_middleware.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
