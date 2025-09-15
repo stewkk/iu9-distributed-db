@@ -10,6 +10,8 @@ result::Result<> Controller::Remove(const boost::asio::yield_context& yield,
     boost::asio::spawn(executor_, [&](boost::asio::yield_context yield) {
       // SendToReplicas(yield);
     });
+  } else {
+    version_generator_.UpdateMaxVersion(data.version.value());
   }
 
   auto err = storage_system_.Remove(yield, key, version.value());

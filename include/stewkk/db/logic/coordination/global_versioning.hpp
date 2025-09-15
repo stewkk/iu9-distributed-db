@@ -9,6 +9,7 @@ class VersionNumberGenerator {
 public:
   explicit VersionNumberGenerator(uint64_t start);
   uint64_t Generate();
+  void UpdateMaxVersion(uint64_t version);
 
   VersionNumberGenerator(VersionNumberGenerator&& other);
   VersionNumberGenerator& operator=(VersionNumberGenerator&& other);

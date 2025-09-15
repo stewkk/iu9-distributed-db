@@ -10,7 +10,7 @@ result::Result<> Controller::Insert(const boost::asio::yield_context& yield,
       // SendToReplicas(yield);
     });
   } else {
-    // version_generator_.UpdateMaxVersion(data.version);
+    version_generator_.UpdateMaxVersion(data.version.value());
   }
 
   auto [key, value, version] = std::move(data);
