@@ -4,6 +4,7 @@ service Db {
   rpc Insert (KeyValueRequest) returns (EmptyReply) {}
   rpc Remove (KeyRequest)      returns (EmptyReply) {}
   rpc Get    (GetRequest)      returns (GetReply)   {}
+  rpc GetMasterNode (EmptyRequest) returns (GetMasterNodeReply) {}
 }
 
 enum Source {
@@ -38,4 +39,8 @@ message GetRequest {
   optional string key = 1;
   optional Source source = 2;
   optional bool   is_master = 3;
+}
+
+message GetMasterNodeReply {
+  optional string host = 1;
 }

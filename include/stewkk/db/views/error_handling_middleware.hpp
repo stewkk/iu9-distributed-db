@@ -28,6 +28,14 @@ WithErrorHandlingMiddleware(
         rpc.finish_with_error(grpc::Status(grpc::NOT_FOUND, error.What()), yield);
         return;
       }
+      if (error.Wraps(logic::result::ErrorType::kNotMaster)) {
+        rpc.finish_with_error(grpc::Status(grpc::FAILED_PRECONDITION, error.What()), yield);
+        return;
+      }
+      if (error.Wraps(logic::result::ErrorType::kNotConnected)) {
+        rpc.finish_with_error(grpc::Status(grpc::UNAVAILABLE, error.What()), yield);
+        return;
+      }
 
       rpc.finish_with_error(grpc::Status(grpc::UNKNOWN, "unknown error"), yield);
       return;

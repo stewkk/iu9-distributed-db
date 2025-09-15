@@ -11,12 +11,12 @@ template <> std::function<GetHandlerType> WithIsMasterMiddleware<GetController, 
     }
     if (request.is_master() && !logic::coordination::IsMaster()) {
       return logic::result::Result<GetRPC::Response>(
-          logic::result::MakeError("node is not master"));
+          logic::result::MakeError<logic::result::ErrorType::kNotMaster>("node is not master"));
     }
     auto res = handler(controller, rpc, request, yield);
     if (request.is_master() && !logic::coordination::IsMaster()) {
       return logic::result::Result<GetRPC::Response>(
-          logic::result::MakeError("node is not master"));
+          logic::result::MakeError<logic::result::ErrorType::kNotMaster>("node is not master"));
     }
     return res;
   };

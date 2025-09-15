@@ -72,3 +72,11 @@ class GetRequest(_message.Message):
 
     def __init__(self, key: _Optional[str]=..., source: _Optional[_Union[Source, str]]=..., is_master: bool=...) -> None:
         ...
+
+class GetMasterNodeReply(_message.Message):
+    __slots__ = ('host',)
+    HOST_FIELD_NUMBER: _ClassVar[int]
+    host: str
+
+    def __init__(self, host: _Optional[str]=...) -> None:
+        ...

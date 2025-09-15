@@ -20,12 +20,14 @@ WithIsExpiredMiddleware(
                    const boost::asio::yield_context& yield) {
     if (logic::coordination::IsConnectionExpired()) {
       return logic::result::Result<typename RPC::Response>(
-          logic::result::MakeError("node is not connected to cluster"));
+          logic::result::MakeError<logic::result::ErrorType::kNotConnected>(
+              "node is not connected to cluster"));
     }
     auto res = handler(controller, rpc, request, yield);
     if (logic::coordination::IsConnectionExpired()) {
       return logic::result::Result<typename RPC::Response>(
-          logic::result::MakeError("node is not connected to cluster"));
+          logic::result::MakeError<logic::result::ErrorType::kNotConnected>(
+              "node is not connected to cluster"));
     }
     return res;
   };

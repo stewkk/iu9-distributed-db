@@ -9,6 +9,8 @@ namespace stewkk::db::logic::result {
 enum class ErrorType {
   kUnknown,
   kNotFound,
+  kNotMaster,
+  kNotConnected,
 };
 
 class Error : public std::exception {

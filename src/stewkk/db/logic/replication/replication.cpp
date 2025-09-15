@@ -5,6 +5,7 @@
 #include <grpcpp/create_channel.h>
 #include <grpcpp/generic/generic_stub.h>
 #include <agrpc/client_rpc.hpp>
+#include <boost/asio/deadline_timer.hpp>
 
 #include <stewkk/db/logic/coordination/zookeeper.hpp>
 
@@ -67,6 +68,23 @@ result::Result<Response> MakeRequest(const boost::asio::yield_context& yield, Re
   return response;
 }
 
+template <RequestType type, typename Request, typename Response>
+result::Result<Response> MakeRequestWithBackoff(const boost::asio::yield_context& yield,
+                                                Request request, agrpc::GrpcContext& grpc_context,
+                                                grpc::GenericStub& stub) {
+  int delay = 1;
+  for (int i = 0; i < 5; i++) {
+    auto got = MakeRequest<type, Request, Response>(yield, request, grpc_context, stub);
+    if (got.has_value()) {
+      return got;
+    }
+    boost::asio::deadline_timer timer{grpc_context};
+    timer.expires_from_now(boost::posix_time::seconds(delay));
+    timer.async_wait(yield);
+    delay *= 2;
+  }
+}
+
 }  // namespace
 
 ReplicaClient::ReplicaClient(std::string host, agrpc::GrpcContext& grpc_context)
@@ -79,7 +97,7 @@ result::Result<models::dto::ValueDTO> ReplicaClient::Get(const boost::asio::yiel
   request.set_key(data.key);
   request.set_source(iu9db::Source::SOURCE_NODE);
 
-  auto res = MakeRequest<RequestType::kGet, iu9db::GetRequest, iu9db::GetReply>(
+  auto res = MakeRequestWithBackoff<RequestType::kGet, iu9db::GetRequest, iu9db::GetReply>(
       yield, request, grpc_context_, stub_);
   if (res.has_failure()) {
     return result::WrapError(std::move(res), "get");
@@ -100,8 +118,9 @@ result::Result<> ReplicaClient::Insert(const boost::asio::yield_context& yield,
   request.set_version(data.version.value());
   request.set_source(iu9db::Source::SOURCE_NODE);
 
-  auto res = MakeRequest<RequestType::kInsert, iu9db::KeyValueRequest, iu9db::EmptyReply>(
-      yield, request, grpc_context_, stub_);
+  auto res
+      = MakeRequestWithBackoff<RequestType::kInsert, iu9db::KeyValueRequest, iu9db::EmptyReply>(
+          yield, request, grpc_context_, stub_);
   if (res.has_failure()) {
     return result::WrapError(std::move(res), "insert");
   }
@@ -115,7 +134,7 @@ result::Result<> ReplicaClient::Remove(const boost::asio::yield_context& yield,
   request.set_version(data.version.value());
   request.set_source(iu9db::Source::SOURCE_NODE);
 
-  auto res = MakeRequest<RequestType::kRemove, iu9db::KeyRequest, iu9db::EmptyReply>(
+  auto res = MakeRequestWithBackoff<RequestType::kRemove, iu9db::KeyRequest, iu9db::EmptyReply>(
       yield, request, grpc_context_, stub_);
   if (res.has_failure()) {
     return result::WrapError(std::move(res), "remove");
@@ -156,6 +175,7 @@ result::Result<> Replication::SendRemoveToReplicas(const boost::asio::yield_cont
   }
   auto nodes = std::move(nodes_opt).assume_value();
 
+  // TODO: make it concurrent tasks
   for (auto& node : nodes) {
     result::Result<> err = result::Ok();
     auto do_request = [&](auto& value) { err = value.second.Remove(yield, data); };
