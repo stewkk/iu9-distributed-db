@@ -2,7 +2,7 @@
 
 namespace stewkk::db::views {
 
-using logic::controllers::KeyDTO;
+using models::dto::KeyDTO;
 
 logic::result::Result<RemoveRPC::Response> RemoveHandler(RemoveController& controller,
                                                          RemoveRPC& rpc,

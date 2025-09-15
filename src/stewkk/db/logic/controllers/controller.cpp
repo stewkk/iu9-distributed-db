@@ -23,7 +23,8 @@ Controller::Controller(storage::SwappableMemoryStorage& storage, recovery::WALWr
       persistent_storage_(persistent_storage),
       swap_job_guard_(),
       version_generator_(version_generator),
-      executor_(executor) {}
+      executor_(executor),
+      storage_system_(wal_writer, storage_, persistent_storage) {}
 
 void Controller::TriggerSwapToPersistentStorage() {
   if (storage_.Size() < kThreshold) {

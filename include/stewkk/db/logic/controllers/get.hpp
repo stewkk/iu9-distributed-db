@@ -2,14 +2,15 @@
 
 #include <boost/asio/spawn.hpp>
 
-#include <stewkk/db/logic/controllers/dto.hpp>
 #include <stewkk/db/logic/result/result.hpp>
+#include <stewkk/db/models/dto/dto.hpp>
 
 namespace stewkk::db::logic::controllers {
 
 class GetController {
 public:
-  virtual result::Result<ValueDTO> Get(const boost::asio::yield_context& yield, GetRequestDTO data)
+  virtual result::Result<models::dto::ValueDTO> Get(const boost::asio::yield_context& yield,
+                                                    models::dto::GetRequestDTO data)
       = 0;
 
   virtual ~GetController() = default;

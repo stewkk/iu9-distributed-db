@@ -11,6 +11,7 @@
 #include <stewkk/db/logic/recovery/wal_writer.hpp>
 #include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/logic/storage/persistent_collection.hpp>
+#include <stewkk/db/logic/storage/storage_system.hpp>
 #include <stewkk/db/logic/storage/swappable_memstorage.hpp>
 #include <stewkk/db/logic/synchronization/job_guard.hpp>
 
@@ -24,16 +25,19 @@ public:
              coordination::VersionNumberGenerator& version_generator,
              boost::asio::any_io_executor executor);
 
-  virtual result::Result<> Insert(const boost::asio::yield_context& yield, KwDTO data) override;
-  virtual result::Result<> Remove(const boost::asio::yield_context& yield, KeyDTO data) override;
-  virtual result::Result<ValueDTO> Get(const boost::asio::yield_context& yield,
-                                       GetRequestDTO data) override;
+  virtual result::Result<> Insert(const boost::asio::yield_context& yield,
+                                  models::dto::KwDTO data) override;
+  virtual result::Result<> Remove(const boost::asio::yield_context& yield,
+                                  models::dto::KeyDTO data) override;
+  virtual result::Result<models::dto::ValueDTO> Get(const boost::asio::yield_context& yield,
+                                                    models::dto::GetRequestDTO data) override;
 
 private:
   void SwapToPersistentStorage(const boost::asio::yield_context& yield);
   void TriggerSwapToPersistentStorage();
 
-  result::Result<> ReplicationInsert(const boost::asio::yield_context& yield, KwDTO data);
+  result::Result<> ReplicationInsert(const boost::asio::yield_context& yield,
+                                     models::dto::KwDTO data);
 
 private:
   storage::SwappableMemoryStorage& storage_;
@@ -41,6 +45,7 @@ private:
   recovery::SwappableWalWriter& swappable_wal_writer_;
   storage::PersistentStorageCollection& persistent_storage_;
   coordination::VersionNumberGenerator& version_generator_;
+  storage::StorageSystem storage_system_;
 
   boost::asio::any_io_executor executor_;
   synchronization::JobGuard swap_job_guard_;

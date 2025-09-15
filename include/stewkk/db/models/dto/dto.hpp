@@ -4,7 +4,7 @@
 #include <optional>
 #include <string>
 
-namespace stewkk::db::logic::controllers {
+namespace stewkk::db::models::dto {
 
 struct KwDTO {
   std::string key;
@@ -26,4 +26,4 @@ struct GetRequestDTO {
   std::string key;
 };
 
-}  // namespace stewkk::db::logic::controllers
+}  // namespace stewkk::db::models::dto

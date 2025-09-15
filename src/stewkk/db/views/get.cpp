@@ -2,7 +2,7 @@
 
 namespace stewkk::db::views {
 
-using logic::controllers::GetRequestDTO;
+using models::dto::GetRequestDTO;
 
 logic::result::Result<GetRPC::Response> GetHandler(GetController& controller, GetRPC& rpc,
                                                    GetRPC::Request& request,

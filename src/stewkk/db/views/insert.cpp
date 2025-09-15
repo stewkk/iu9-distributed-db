@@ -7,7 +7,7 @@ logic::result::Result<InsertRPC::Response> InsertHandler(InsertController& contr
                                                          InsertRPC::Request& request,
                                                          const boost::asio::yield_context& yield) {
   auto got = controller.Insert(
-      yield, logic::controllers::KwDTO{request.key(), request.value(), request.version()});
+      yield, models::dto::KwDTO{request.key(), request.value(), request.version()});
   if (got.has_failure()) {
     return logic::result::WrapError(std::move(got), "insert controller failed");
   }

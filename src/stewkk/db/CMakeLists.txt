@@ -101,6 +101,8 @@ add_library(libdb
   logic/coordination/zookeeper.cpp
   logic/coordination/global_versioning.cpp
   views/is_master_middleware.cpp
+  logic/replication/replication.cpp
+  logic/storage/storage_system.cpp
 )
 add_library(stewkk::libdb ALIAS libdb)
 target_compile_features(libdb PUBLIC cxx_std_20)
