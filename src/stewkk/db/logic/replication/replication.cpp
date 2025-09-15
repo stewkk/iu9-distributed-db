@@ -1,9 +1,12 @@
 #include <stewkk/db/logic/replication/replication.hpp>
 
+#include <absl/log/log.h>
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
 #include <grpcpp/generic/generic_stub.h>
 #include <agrpc/client_rpc.hpp>
+
+#include <stewkk/db/logic/coordination/zookeeper.hpp>
 
 namespace stewkk::db::logic::replication {
 
@@ -116,6 +119,54 @@ result::Result<> ReplicaClient::Remove(const boost::asio::yield_context& yield,
       yield, request, grpc_context_, stub_);
   if (res.has_failure()) {
     return result::WrapError(std::move(res), "remove");
+  }
+  return result::Ok();
+}
+
+Replication::Replication(agrpc::GrpcContext& grpc_context) : grpc_context_(grpc_context) {}
+
+result::Result<> Replication::SendInsertToReplicas(const boost::asio::yield_context& yield,
+                                                   models::dto::KwDTO data) {
+  auto nodes_opt = coordination::GetNodes();
+  if (nodes_opt.has_failure()) {
+    return result::WrapError(std::move(nodes_opt), "failed to get nodes list");
+  }
+
+  auto nodes = std::move(nodes_opt).assume_value();
+  for (auto& node : nodes) {
+    result::Result<> err = result::Ok();
+    auto do_request = [&](auto& value) { err = value.second.Insert(yield, data); };
+    if (host_to_client_.emplace_or_visit(node, ReplicaClient(node, grpc_context_), do_request)) {
+      host_to_client_.visit(node, do_request);
+    }
+    if (err.has_failure()) {
+      LOG(WARNING) << "error while sending insert request to replicas: "
+                   << err.assume_error().What();
+    }
+    LOG(INFO) << "replicated insert request with key=" << data.key << " to node=" << node;
+  }
+  return result::Ok();
+}
+
+result::Result<> Replication::SendRemoveToReplicas(const boost::asio::yield_context& yield,
+                                                   models::dto::KeyDTO data) {
+  auto nodes_opt = coordination::GetNodes();
+  if (nodes_opt.has_failure()) {
+    return result::WrapError(std::move(nodes_opt), "failed to get nodes list");
+  }
+
+  auto nodes = std::move(nodes_opt).assume_value();
+  for (auto& node : nodes) {
+    result::Result<> err = result::Ok();
+    auto do_request = [&](auto& value) { err = value.second.Remove(yield, data); };
+    if (host_to_client_.emplace_or_visit(node, ReplicaClient(node, grpc_context_), do_request)) {
+      host_to_client_.visit(node, do_request);
+    }
+    if (err.has_failure()) {
+      LOG(WARNING) << "error while sending remove request to replicas: "
+                   << err.assume_error().What();
+    }
+    LOG(INFO) << "replicated remove request with key=" << data.key << " to node=" << node;
   }
   return result::Ok();
 }

@@ -58,8 +58,10 @@ void RunServer(std::string host, uint16_t port, std::vector<std::string> zookeep
     LOG(FATAL) << "failed to initialize storages: " << storages.assume_error().What();
   }
   auto [persistent, storage, wal_writer, version_generator] = std::move(storages).assume_value();
+  stewkk::db::logic::replication::Replication replication(grpc_context);
   stewkk::db::views::HandlersProxy handlers(stewkk::db::logic::controllers::Controller{
-      storage, wal_writer, wal_writer, persistent, version_generator, grpc_context.get_executor()});
+      storage, wal_writer, wal_writer, persistent, version_generator, replication,
+      grpc_context.get_executor()});
   stewkk::db::views::RegisterHandlers(handlers, grpc_context, service);
 
   auto err

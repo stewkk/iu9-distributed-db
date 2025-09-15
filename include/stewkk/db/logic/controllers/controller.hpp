@@ -9,6 +9,7 @@
 #include <stewkk/db/logic/coordination/global_versioning.hpp>
 #include <stewkk/db/logic/recovery/swappable_wal_writer.hpp>
 #include <stewkk/db/logic/recovery/wal_writer.hpp>
+#include <stewkk/db/logic/replication/replication.hpp>
 #include <stewkk/db/logic/result/result.hpp>
 #include <stewkk/db/logic/storage/persistent_collection.hpp>
 #include <stewkk/db/logic/storage/storage_system.hpp>
@@ -23,7 +24,7 @@ public:
              recovery::SwappableWalWriter& swappable_wal_writer,
              storage::PersistentStorageCollection& persistent_storage,
              coordination::VersionNumberGenerator& version_generator,
-             boost::asio::any_io_executor executor);
+             replication::Replication& replication, boost::asio::any_io_executor executor);
 
   virtual result::Result<> Insert(const boost::asio::yield_context& yield,
                                   models::dto::KwDTO data) override;
@@ -46,6 +47,7 @@ private:
   storage::PersistentStorageCollection& persistent_storage_;
   coordination::VersionNumberGenerator& version_generator_;
   storage::StorageSystem storage_system_;
+  replication::Replication& replication_;
 
   boost::asio::any_io_executor executor_;
   synchronization::JobGuard swap_job_guard_;

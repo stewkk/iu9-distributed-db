@@ -16,7 +16,7 @@ Controller::Controller(storage::SwappableMemoryStorage& storage, recovery::WALWr
                        recovery::SwappableWalWriter& swappablewal_writer,
                        storage::PersistentStorageCollection& persistent_storage,
                        coordination::VersionNumberGenerator& version_generator,
-                       boost::asio::any_io_executor executor)
+                       replication::Replication& replication, boost::asio::any_io_executor executor)
     : storage_(storage),
       wal_writer_(wal_writer),
       swappable_wal_writer_(swappablewal_writer),
@@ -24,7 +24,8 @@ Controller::Controller(storage::SwappableMemoryStorage& storage, recovery::WALWr
       swap_job_guard_(),
       version_generator_(version_generator),
       executor_(executor),
-      storage_system_(wal_writer, storage_, persistent_storage) {}
+      storage_system_(wal_writer, storage_, persistent_storage),
+      replication_(replication) {}
 
 void Controller::TriggerSwapToPersistentStorage() {
   if (storage_.Size() < kThreshold) {
