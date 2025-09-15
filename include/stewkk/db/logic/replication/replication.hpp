@@ -35,6 +35,8 @@ public:
                                         models::dto::KwDTO data);
   result::Result<> SendRemoveToReplicas(const boost::asio::yield_context& yield,
                                         models::dto::KeyDTO data);
+  result::Result<models::dto::ValueDTO> GetNewestFromReplicas(
+      const boost::asio::yield_context& yield, models::dto::GetRequestDTO key);
 
 private:
   agrpc::GrpcContext& grpc_context_;

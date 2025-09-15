@@ -131,8 +131,8 @@ result::Result<> Replication::SendInsertToReplicas(const boost::asio::yield_cont
   if (nodes_opt.has_failure()) {
     return result::WrapError(std::move(nodes_opt), "failed to get nodes list");
   }
-
   auto nodes = std::move(nodes_opt).assume_value();
+
   for (auto& node : nodes) {
     result::Result<> err = result::Ok();
     auto do_request = [&](auto& value) { err = value.second.Insert(yield, data); };
@@ -154,8 +154,8 @@ result::Result<> Replication::SendRemoveToReplicas(const boost::asio::yield_cont
   if (nodes_opt.has_failure()) {
     return result::WrapError(std::move(nodes_opt), "failed to get nodes list");
   }
-
   auto nodes = std::move(nodes_opt).assume_value();
+
   for (auto& node : nodes) {
     result::Result<> err = result::Ok();
     auto do_request = [&](auto& value) { err = value.second.Remove(yield, data); };
@@ -169,6 +169,33 @@ result::Result<> Replication::SendRemoveToReplicas(const boost::asio::yield_cont
     LOG(INFO) << "replicated remove request with key=" << data.key << " to node=" << node;
   }
   return result::Ok();
+}
+
+result::Result<models::dto::ValueDTO> Replication::GetNewestFromReplicas(
+    const boost::asio::yield_context& yield, models::dto::GetRequestDTO key) {
+  auto nodes_opt = coordination::GetNodes();
+  if (nodes_opt.has_failure()) {
+    return result::WrapError(std::move(nodes_opt), "failed to get nodes list");
+  }
+  auto nodes = std::move(nodes_opt).assume_value();
+
+  result::Result<models::dto::ValueDTO> result
+      = result::MakeError("failed to retrieve value from replicas");
+  for (auto& node : nodes) {
+    result::Result<models::dto::ValueDTO> err = result::Ok(models::dto::ValueDTO{});
+    auto do_request = [&](auto& value) { err = value.second.Get(yield, key); };
+    if (host_to_client_.emplace_or_visit(node, ReplicaClient(node, grpc_context_), do_request)) {
+      host_to_client_.visit(node, do_request);
+    }
+
+    if (err.has_failure()) {
+      continue;
+    }
+    if (!result.has_value() || result.assume_value().version < err.assume_value().version) {
+      result = err.assume_value();
+    }
+  }
+  return result;
 }
 
 }  // namespace stewkk::db::logic::replication
