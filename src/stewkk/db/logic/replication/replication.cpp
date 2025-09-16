@@ -73,8 +73,9 @@ result::Result<Response> MakeRequestWithBackoff(const boost::asio::yield_context
                                                 Request request, agrpc::GrpcContext& grpc_context,
                                                 grpc::GenericStub& stub) {
   int delay = 1;
+  result::Result<Response> got = result::Ok(Response{});
   for (int i = 0; i < 5; i++) {
-    auto got = MakeRequest<type, Request, Response>(yield, request, grpc_context, stub);
+    got = MakeRequest<type, Request, Response>(yield, request, grpc_context, stub);
     if (got.has_value()) {
       return got;
     }
@@ -83,6 +84,7 @@ result::Result<Response> MakeRequestWithBackoff(const boost::asio::yield_context
     timer.async_wait(yield);
     delay *= 2;
   }
+  return got;
 }
 
 }  // namespace
